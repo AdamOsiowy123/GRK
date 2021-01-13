@@ -45,6 +45,7 @@ GLuint textureMercury;
 GLuint textureId;
 
 glm::vec3 wspolrzedne[400];
+glm::mat4 scale[400];
 int roznicaX;
 int roznicaY;
 int ostatniX;
@@ -160,7 +161,8 @@ void renderScene()
 			textureId = textureVenus;
 		}
 		
-		drawObjectTexture(&sphereModel, glm::translate(wspolrzedne[i]), textureId);
+		
+		drawObjectTexture(&sphereModel, glm::translate(wspolrzedne[i]) * scale[i % 50], textureId);
 	}
 
 	glutSwapBuffers();
@@ -184,6 +186,9 @@ void init()
 
 	for (int i = 0; i < 300; i++) {
 		wspolrzedne[i] = glm::ballRand(100.0f);
+	}
+	for (int i = 0; i < 50; i++) {
+		scale[i] = glm::scale(glm::vec3(rand() % 5 * 1.0f));
 	}
 	ostatniX = 300;
 	ostatniY = 300;
