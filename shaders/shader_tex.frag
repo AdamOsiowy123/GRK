@@ -30,10 +30,10 @@ void main()
 	}
 
 	vec3 lightColor = vec3(1);
-	float attenuation = clamp( 30.0 / distance, 0.0, 1.0);
+	float attenuation = clamp( 40.0 / distance, 0.0, 1.0);
 	vec3 shadedColor = (color * diffuse + lightColor * specular) * attenuation;
 	
 	float ambient = 0.2;
 
-	gl_FragColor = vec4(mix(color, shadedColor, 1.0 - ambient), 1.0);
+	gl_FragColor = vec4(mix(color, shadedColor - ambient, 1.0 - 0.5* ambient), 1.0);
 }
