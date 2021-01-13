@@ -37,6 +37,12 @@ glm::quat rotation = glm::quat(1, 0, 0, 0);
 
 GLuint textureAsteroid;
 GLuint textureAsteroid_normals;
+GLuint textureJupiter;
+GLuint textureMars;
+GLuint textureVenus;
+GLuint textureMercury;
+
+GLuint textureId;
 
 glm::vec3 wspolrzedne[400];
 int roznicaX;
@@ -139,8 +145,22 @@ void renderScene()
 
 	drawObjectTexture(&sphereModel, glm::translate(glm::vec3(0,0,0)), textureAsteroid);
 
-	for (int i = 0; i < 10; i++) {
-		drawObjectTexture(&sphereModel, glm::translate(wspolrzedne[i]), textureAsteroid);
+	
+	for (int i = 0; i < 300; i++) {
+		if (i % 4 == 0) {
+			textureId = textureJupiter;
+		}
+		else if (i % 4 == 1) {
+			textureId = textureMercury;
+		}
+		else if (i % 4 == 2) {
+			textureId = textureMars;
+		}
+		else if (i % 4 == 1) {
+			textureId = textureVenus;
+		}
+		
+		drawObjectTexture(&sphereModel, glm::translate(wspolrzedne[i]), textureId);
 	}
 
 	glutSwapBuffers();
@@ -157,8 +177,13 @@ void init()
 	shipModel = obj::loadModelFromFile("models/spaceship.obj");
 	textureAsteroid = Core::LoadTexture("textures/asteroid.png");
 	textureAsteroid_normals = Core::LoadTexture("textures/asteroid_normals.png");
-	for (int i = 0; i < 400; i++) {
-		wspolrzedne[i] = glm::ballRand(30.0f);
+	textureJupiter = Core::LoadTexture("textures/jupiter.png");
+	textureMars = Core::LoadTexture("textures/mars.png");
+	textureMercury = Core::LoadTexture("textures/mercury.png");
+	textureVenus = Core::LoadTexture("textures/venus.png");
+
+	for (int i = 0; i < 300; i++) {
+		wspolrzedne[i] = glm::ballRand(100.0f);
 	}
 	ostatniX = 300;
 	ostatniY = 300;
