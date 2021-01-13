@@ -1,8 +1,13 @@
 ﻿
+<<<<<<< HEAD
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.28922.388
 MinimumVisualStudioVersion = 10.0.40219.1
+=======
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+>>>>>>> b235d88f67b3db56cd8d8e7b1b6cafb7deac6333
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GRK", "GRK.vcxproj", "{1B448102-E76C-4347-BDC7-40D02A567DB6}"
 EndProject
 Global
@@ -19,7 +24,10 @@ Global
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
+<<<<<<< HEAD
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E7900110-3DA0-4BC6-9837-09366B880631}
 	EndGlobalSection
+=======
+>>>>>>> b235d88f67b3db56cd8d8e7b1b6cafb7deac6333
 EndGlobal
