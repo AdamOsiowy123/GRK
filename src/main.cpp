@@ -61,6 +61,7 @@ void keyboard(unsigned char key, int x, int y)
 	{
 	case 'z': roznicaZ = -20.0f; break;
 	case 'x': roznicaZ = 20.0f; break;
+	case 'w'&& 'a': cameraPos += cameraDir * moveSpeed - cameraSide * moveSpeed; break;
 	case 'w': cameraPos += cameraDir * moveSpeed; break;
 	case 's': cameraPos -= cameraDir * moveSpeed; break;
 	case 'd': cameraPos += cameraSide * moveSpeed; break;
@@ -157,7 +158,7 @@ void renderScene()
 		else if (i % 4 == 2) {
 			textureId = textureMars;
 		}
-		else if (i % 4 == 1) {
+		else if (i % 4 == 3) {
 			textureId = textureVenus;
 		}
 		

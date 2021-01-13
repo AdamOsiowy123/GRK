@@ -12,6 +12,7 @@ void main()
 {
 	vec2 modifiedTexCoord = vec2(0.7 - interpTexCoord.x, interpTexCoord.y); // Poprawka dla tekstur Ziemi, ktore bez tego wyswietlaja sie 'do gory nogami'
 	vec3 lightDir = normalize(vertexPos - lightPos);
+	float distance = length(vertexPos - lightPos);
 	vec3 color = texture2D(textureSampler, modifiedTexCoord).rgb;
 	vec3 L = -lightDir;
 	vec3 V = normalize(cameraPos - vertexPos);
@@ -29,7 +30,8 @@ void main()
 	}
 
 	vec3 lightColor = vec3(1);
-	vec3 shadedColor = color * diffuse + lightColor * specular;
+	float attenuation = clamp( 30.0 / distance, 0.0, 1.0);
+	vec3 shadedColor = (color * diffuse + lightColor * specular) * attenuation;
 	
 	float ambient = 0.2;
 
