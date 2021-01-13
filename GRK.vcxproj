@@ -28,6 +28,8 @@
   <ItemGroup>
     <None Include="shaders\shader_color.frag" />
     <None Include="shaders\shader_color.vert" />
+    <None Include="shaders\shader_sun.frag" />
+    <None Include="shaders\shader_sun.vert" />
     <None Include="shaders\shader_tex.frag" />
     <None Include="shaders\shader_tex.vert" />
   </ItemGroup>
