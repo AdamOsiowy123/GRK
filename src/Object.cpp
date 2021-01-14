@@ -8,7 +8,6 @@ Object::Object(GLuint program, obj::Model model, glm::mat4 matrix, GLuint textur
 	this->texture = texture;
 	this->lightPos = lightPos;
 	this->lightPos2 = lightPos2;
-	Object::objects.push_back(this);
 }
 
 void Object::setMatrix(glm::mat4 matrix)

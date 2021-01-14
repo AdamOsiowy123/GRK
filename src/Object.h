@@ -22,7 +22,6 @@ private:
 	glm::vec3 lightPos;
 	glm::vec3 lightPos2;
 public:
-	static vector<Object*> objects;
 	Object(GLuint program,obj::Model model,glm::mat4 matrix,GLuint texture,glm::vec3 lightPos,glm::vec3 lightPos2);
 	obj::Model getModel() { return model; }
 	glm::mat4 getMatrix() { return matrix; }
