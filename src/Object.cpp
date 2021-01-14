@@ -1,5 +1,9 @@
 #include "Object.h"
 
+Object::Object()
+{
+}
+
 Object::Object(GLuint program, obj::Model model, glm::mat4 matrix, GLuint texture,glm::vec3 lightPos,glm::vec3 lightPos2)
 {
 	this->program = program;
