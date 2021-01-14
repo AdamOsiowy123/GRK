@@ -13,6 +13,6 @@ out vec3 vertexPos;
 void main()
 {
 	gl_Position = modelViewProjectionMatrix * vec4(vertexPosition, 1.0);
-	interpNormal = normalize(vec3(modelMatrix * vec4(vertexNormal, 0.0)));
+	interpNormal = vertexNormal;
 	vertexPos = vec3(modelMatrix * vec4(vertexPosition, 1.0));
 }
