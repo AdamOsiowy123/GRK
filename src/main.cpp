@@ -10,6 +10,10 @@
 #include "Render_Utils.h"
 #include "Camera.h"
 #include "Texture.h"
+#include "Asteroid.h"
+#include "Planet.h"
+#include "Sun.h"
+#include "Ship.h"
 
 GLuint programColor;
 GLuint programTexture;
@@ -53,6 +57,11 @@ int ostatniX;
 int ostatniY;
 int roznicaZ;
 
+Ship ship;
+Asteroid asteroid;
+Sun sun1;
+Sun sun2;
+
 void keyboard(unsigned char key, int x, int y)
 {
 	
@@ -94,64 +103,29 @@ glm::mat4 createCameraMatrix()
 	return Core::createViewMatrixQuat(cameraPos, rotation);
 }
 
-void drawObjectColor(obj::Model * model, glm::mat4 modelMatrix, glm::vec3 color, GLuint program)
-{
+void createObjects() {
+	std::cout << &sphereModel << std::endl;
+	std::cout << &shipModel << std::endl;
+	for (int i = 0; i < 300; i++) {
+		wspolrzedne[i] = glm::ballRand(100.0f);
+	}
+	for (int i = 0; i < 50; i++) {
+		scale[i] = glm::scale(glm::vec3(rand() % 5 * 1.0f));
+	}
+	ostatniX = 300;
+	ostatniY = 300;
 
-	glUseProgram(program);
+	ship = Ship(programColor, &shipModel, sunPos, sunPos2, glm::vec3(0.6f));
+	ship.addToStaticVector();
 
-	glUniform3f(glGetUniformLocation(program, "objectColor"), color.x, color.y, color.z);
-	//glUniform3f(glGetUniformLocation(program, "lightDir"), lightDir.x, lightDir.y, lightDir.z);
-	glUniform3f(glGetUniformLocation(program, "lightPos"), sunPos.x, sunPos.y, sunPos.z);
-	glUniform3f(glGetUniformLocation(program, "lightPos2"), sunPos2.x, sunPos2.y, sunPos2.z);
-	glUniform3f(glGetUniformLocation(program, "cameraPos"), cameraPos.x, cameraPos.y, cameraPos.z);
+	sun1 = Sun(programSun, &sphereModel, glm::translate(sunPos) * glm::scale(glm::vec3(2.0f)),sunPos,sunPos2,sunColor);
+	sun1.addToStaticVector();
+	sun2 = Sun(programSun, &sphereModel, glm::translate(sunPos2) * glm::scale(glm::vec3(2.0f)), sunPos, sunPos2, sunColor);
+	sun2.addToStaticVector();
 
-	glm::mat4 transformation = perspectiveMatrix * cameraMatrix * modelMatrix;
-	glUniformMatrix4fv(glGetUniformLocation(program, "modelViewProjectionMatrix"), 1, GL_FALSE, (float*)&transformation);
-	glUniformMatrix4fv(glGetUniformLocation(program, "modelMatrix"), 1, GL_FALSE, (float*)&modelMatrix);
+	asteroid = Asteroid(programTexture, &sphereModel, glm::translate(glm::vec3(0, 0, 0)),textureAsteroid,sunPos,sunPos2);
+	asteroid.addToStaticVector();
 
-	Core::DrawModel(model);
-
-	glUseProgram(0);
-}
-
-void drawObjectTexture(obj::Model * model, glm::mat4 modelMatrix, GLuint textureId)
-{
-	GLuint program = programTexture;
-
-	glUseProgram(program);
-
-	glUniform3f(glGetUniformLocation(program, "lightPos"), sunPos.x, sunPos.y, sunPos.z);
-	glUniform3f(glGetUniformLocation(program, "lightPos2"), sunPos2.x, sunPos2.y, sunPos2.z);
-	Core::SetActiveTexture(textureId, "textureSampler", program, 0);
-
-	glm::mat4 transformation = perspectiveMatrix * cameraMatrix * modelMatrix;
-	glUniformMatrix4fv(glGetUniformLocation(program, "modelViewProjectionMatrix"), 1, GL_FALSE, (float*)&transformation);
-	glUniformMatrix4fv(glGetUniformLocation(program, "modelMatrix"), 1, GL_FALSE, (float*)&modelMatrix);
-
-	Core::DrawModel(model);
-
-	glUseProgram(0);
-}
-void renderScene()
-{
-	// Aktualizacja macierzy widoku i rzutowania
-	cameraMatrix = createCameraMatrix();
-	perspectiveMatrix = Core::createPerspectiveMatrix();
-
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0.0f, 0.1f, 0.3f, 1.0f);
-	drawObjectColor(&sphereModel, glm::translate(sunPos) * glm::scale(glm::vec3(2.0f)), sunColor, programSun); //slonce
-	drawObjectColor(&sphereModel, glm::translate(sunPos2) * glm::scale(glm::vec3(2.0f)), sunColor, programSun);
-
-
-	glm::mat4 shipInitialTransformation = glm::translate(glm::vec3(0,-0.25f,0)) * glm::rotate(glm::radians(180.0f), glm::vec3(0,1,0)) * glm::scale(glm::vec3(0.25f));
-	glm::mat4 shipModelMatrix = glm::translate(cameraPos + cameraDir * 0.5f) * glm::mat4_cast(glm::inverse(rotation)) * shipInitialTransformation;
-	drawObjectColor(&shipModel, shipModelMatrix, glm::vec3(0.6f), programColor);
-	//drawObjectTexture(&shipModel, shipModelMatrix, textureJupiter);
-
-	drawObjectTexture(&sphereModel, glm::translate(glm::vec3(0,0,0)), textureAsteroid);
-
-	
 	for (int i = 0; i < 300; i++) {
 		if (i % 4 == 0) {
 			textureId = textureJupiter;
@@ -165,10 +139,38 @@ void renderScene()
 		else if (i % 4 == 3) {
 			textureId = textureVenus;
 		}
-		
-		
-		drawObjectTexture(&sphereModel, glm::translate(wspolrzedne[i]) * scale[i % 50], textureId);
+		Planet planet = Planet(programTexture, &sphereModel, glm::translate(wspolrzedne[i]) * scale[i % 50],textureId,sunPos,sunPos2);
+		planet.addToStaticVector();
 	}
+
+}
+
+void drawObjects() {
+	cameraMatrix = createCameraMatrix();
+	perspectiveMatrix = Core::createPerspectiveMatrix();
+	glm::mat4 shipInitialTransformation = glm::translate(glm::vec3(0, -0.25f, 0)) * glm::rotate(glm::radians(180.0f), glm::vec3(0, 1, 0)) * glm::scale(glm::vec3(0.25f));
+	glm::mat4 shipModelMatrix = glm::translate(cameraPos + cameraDir * 0.5f) * glm::mat4_cast(glm::inverse(rotation)) * shipInitialTransformation;
+	ship.setMatrix(shipModelMatrix);
+	for (Ship* obj : Ship::ship_objects) {
+		obj->draw(obj->getColor(), cameraPos, perspectiveMatrix, cameraMatrix);
+	}
+	for (Sun* obj : Sun::sun_objects) {
+		obj->draw(obj->getColor(),cameraPos,perspectiveMatrix,cameraMatrix);
+	}
+	for (Asteroid* obj : Asteroid::asteroid_objects) {
+		obj->drawTexture(cameraPos,perspectiveMatrix,cameraMatrix);
+	}
+	for (auto obj : Planet::planet_objects) {
+		obj->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);
+	}
+}
+
+void renderScene()
+{
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(0.0f, 0.1f, 0.3f, 1.0f);
+
+	drawObjects();
 
 	glutSwapBuffers();
 }
@@ -188,15 +190,7 @@ void init()
 	textureMars = Core::LoadTexture("textures/mars.png");
 	textureMercury = Core::LoadTexture("textures/mercury.png");
 	textureVenus = Core::LoadTexture("textures/venus.png");
-
-	for (int i = 0; i < 300; i++) {
-		wspolrzedne[i] = glm::ballRand(100.0f);
-	}
-	for (int i = 0; i < 50; i++) {
-		scale[i] = glm::scale(glm::vec3(rand() % 5 * 1.0f));
-	}
-	ostatniX = 300;
-	ostatniY = 300;
+	createObjects();
 	
 }
 
@@ -204,6 +198,7 @@ void shutdown()
 {
 	shaderLoader.DeleteProgram(programColor);
 	shaderLoader.DeleteProgram(programTexture);
+	shaderLoader.DeleteProgram(programSun);
 }
 
 void idle()
