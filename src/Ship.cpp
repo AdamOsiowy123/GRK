@@ -10,3 +10,4 @@ Ship::Ship(GLuint program, obj::Model model, glm::mat4 matrix, GLuint texture, g
 	this->lightPos2 = lightPos2;
 	Ship::ship_objects.push_back(this);
 }
+std::vector<Ship*> Ship::ship_objects;

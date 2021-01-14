@@ -10,3 +10,4 @@ Planet::Planet(GLuint program, obj::Model model, glm::mat4 matrix, GLuint textur
 	this->lightPos2 = lightPos2;
 	Planet::planet_objects.push_back(this);
 }
+std::vector<Planet*> Planet::planet_objects;

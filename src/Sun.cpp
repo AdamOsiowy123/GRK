@@ -9,3 +9,4 @@ Sun::Sun(GLuint program, obj::Model model, glm::mat4 matrix, glm::vec3 lightPos,
 	this->lightPos2 = lightPos2;
 	Sun::sun_objects.push_back(this);
 }
+std::vector<Sun*> Sun::sun_objects;

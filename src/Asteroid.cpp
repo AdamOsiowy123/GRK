@@ -10,3 +10,4 @@ Asteroid::Asteroid(GLuint program, obj::Model model, glm::mat4 matrix, GLuint te
 	this->lightPos2 = lightPos2;
 	Asteroid::asteroid_objects.push_back(this);
 }
+std::vector<Asteroid*> Asteroid::asteroid_objects;
