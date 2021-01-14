@@ -31,6 +31,7 @@ glm::mat4 cameraMatrix, perspectiveMatrix;
 glm::vec3 lightDir = glm::normalize(glm::vec3(1.0f, -0.9f, -1.0f));
 
 glm::vec3 sunPos = glm::vec3(0.0f, 0.0f, 10.0f);
+glm::vec3 sunPos2 = glm::vec3(30.0f, -20.0f, -30.0f);
 glm::vec3 sunColor = glm::vec3(1.0f, 0.5f, 0.2f);
 
 glm::quat rotation = glm::quat(1, 0, 0, 0);
@@ -101,6 +102,7 @@ void drawObjectColor(obj::Model * model, glm::mat4 modelMatrix, glm::vec3 color,
 	glUniform3f(glGetUniformLocation(program, "objectColor"), color.x, color.y, color.z);
 	//glUniform3f(glGetUniformLocation(program, "lightDir"), lightDir.x, lightDir.y, lightDir.z);
 	glUniform3f(glGetUniformLocation(program, "lightPos"), sunPos.x, sunPos.y, sunPos.z);
+	glUniform3f(glGetUniformLocation(program, "lightPos2"), sunPos2.x, sunPos2.y, sunPos2.z);
 	glUniform3f(glGetUniformLocation(program, "cameraPos"), cameraPos.x, cameraPos.y, cameraPos.z);
 
 	glm::mat4 transformation = perspectiveMatrix * cameraMatrix * modelMatrix;
@@ -119,6 +121,7 @@ void drawObjectTexture(obj::Model * model, glm::mat4 modelMatrix, GLuint texture
 	glUseProgram(program);
 
 	glUniform3f(glGetUniformLocation(program, "lightPos"), sunPos.x, sunPos.y, sunPos.z);
+	glUniform3f(glGetUniformLocation(program, "lightPos2"), sunPos2.x, sunPos2.y, sunPos2.z);
 	Core::SetActiveTexture(textureId, "textureSampler", program, 0);
 
 	glm::mat4 transformation = perspectiveMatrix * cameraMatrix * modelMatrix;
@@ -138,11 +141,13 @@ void renderScene()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.1f, 0.3f, 1.0f);
 	drawObjectColor(&sphereModel, glm::translate(sunPos) * glm::scale(glm::vec3(2.0f)), sunColor, programSun); //slonce
+	drawObjectColor(&sphereModel, glm::translate(sunPos2) * glm::scale(glm::vec3(2.0f)), sunColor, programSun);
 
 
 	glm::mat4 shipInitialTransformation = glm::translate(glm::vec3(0,-0.25f,0)) * glm::rotate(glm::radians(180.0f), glm::vec3(0,1,0)) * glm::scale(glm::vec3(0.25f));
 	glm::mat4 shipModelMatrix = glm::translate(cameraPos + cameraDir * 0.5f) * glm::mat4_cast(glm::inverse(rotation)) * shipInitialTransformation;
 	drawObjectColor(&shipModel, shipModelMatrix, glm::vec3(0.6f), programColor);
+	//drawObjectTexture(&shipModel, shipModelMatrix, textureJupiter);
 
 	drawObjectTexture(&sphereModel, glm::translate(glm::vec3(0,0,0)), textureAsteroid);
 
