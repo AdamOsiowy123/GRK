@@ -14,6 +14,7 @@
 #include "Planet.h"
 #include "Sun.h"
 #include "Ship.h"
+#include <memory>
 
 GLuint programColor;
 GLuint programTexture;
@@ -57,11 +58,6 @@ int ostatniX;
 int ostatniY;
 int roznicaZ;
 
-Ship ship;
-Asteroid asteroid;
-Sun sun1;
-Sun sun2;
-
 void keyboard(unsigned char key, int x, int y)
 {
 	
@@ -104,8 +100,6 @@ glm::mat4 createCameraMatrix()
 }
 
 void createObjects() {
-	std::cout << &sphereModel << std::endl;
-	std::cout << &shipModel << std::endl;
 	for (int i = 0; i < 300; i++) {
 		wspolrzedne[i] = glm::ballRand(100.0f);
 	}
@@ -115,16 +109,12 @@ void createObjects() {
 	ostatniX = 300;
 	ostatniY = 300;
 
-	ship = Ship(programColor, &shipModel, sunPos, sunPos2, glm::vec3(0.6f));
-	ship.addToStaticVector();
+	std::shared_ptr<Ship>  ship = Ship::create(programColor, &shipModel, sunPos, sunPos2, glm::vec3(0.6f));
 
-	sun1 = Sun(programSun, &sphereModel, glm::translate(sunPos) * glm::scale(glm::vec3(2.0f)),sunPos,sunPos2,sunColor);
-	sun1.addToStaticVector();
-	sun2 = Sun(programSun, &sphereModel, glm::translate(sunPos2) * glm::scale(glm::vec3(2.0f)), sunPos, sunPos2, sunColor);
-	sun2.addToStaticVector();
+	std::shared_ptr<Sun> sun1 = Sun::create(programSun, &sphereModel, glm::translate(sunPos) * glm::scale(glm::vec3(2.0f)),sunPos,sunPos2,sunColor);
+	std::shared_ptr<Sun> sun2 = Sun::create(programSun, &sphereModel, glm::translate(sunPos2) * glm::scale(glm::vec3(2.0f)), sunPos, sunPos2, sunColor);
 
-	asteroid = Asteroid(programTexture, &sphereModel, glm::translate(glm::vec3(0, 0, 0)),textureAsteroid,sunPos,sunPos2);
-	asteroid.addToStaticVector();
+	std::shared_ptr<Asteroid> asteroid = Asteroid::create(programTexture, &sphereModel, glm::translate(glm::vec3(0, 0, 0)),textureAsteroid,sunPos,sunPos2);
 
 	for (int i = 0; i < 300; i++) {
 		if (i % 4 == 0) {
@@ -139,8 +129,7 @@ void createObjects() {
 		else if (i % 4 == 3) {
 			textureId = textureVenus;
 		}
-		Planet planet = Planet(programTexture, &sphereModel, glm::translate(wspolrzedne[i]) * scale[i % 50],textureId,sunPos,sunPos2);
-		planet.addToStaticVector();
+		std::shared_ptr<Planet> planet = Planet::create(programTexture, &sphereModel, glm::translate(wspolrzedne[i]) * scale[i % 50],textureId,sunPos,sunPos2);
 	}
 
 }
@@ -150,14 +139,15 @@ void drawObjects() {
 	perspectiveMatrix = Core::createPerspectiveMatrix();
 	glm::mat4 shipInitialTransformation = glm::translate(glm::vec3(0, -0.25f, 0)) * glm::rotate(glm::radians(180.0f), glm::vec3(0, 1, 0)) * glm::scale(glm::vec3(0.25f));
 	glm::mat4 shipModelMatrix = glm::translate(cameraPos + cameraDir * 0.5f) * glm::mat4_cast(glm::inverse(rotation)) * shipInitialTransformation;
-	ship.setMatrix(shipModelMatrix);
-	for (Ship* obj : Ship::ship_objects) {
+	//ship.setMatrix(shipModelMatrix);
+	for (auto obj : Ship::ship_objects) {
+		obj->setMatrix(shipModelMatrix);
 		obj->draw(obj->getColor(), cameraPos, perspectiveMatrix, cameraMatrix);
 	}
-	for (Sun* obj : Sun::sun_objects) {
-		obj->draw(obj->getColor(),cameraPos,perspectiveMatrix,cameraMatrix);
+	for (auto obj : Sun::sun_objects) {
+		obj->draw(obj->getColor(), cameraPos, perspectiveMatrix, cameraMatrix);
 	}
-	for (Asteroid* obj : Asteroid::asteroid_objects) {
+	for (auto obj : Asteroid::asteroid_objects) {
 		obj->drawTexture(cameraPos,perspectiveMatrix,cameraMatrix);
 	}
 	for (auto obj : Planet::planet_objects) {

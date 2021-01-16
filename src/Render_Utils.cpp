@@ -35,23 +35,12 @@ void Core::DrawVertexArray( const VertexData & data )
 
 void Core::DrawModel( obj::Model * model )
 {
-	std::cout << "10" << std::endl;
-	std::cout << "model: "<<model << std::endl;
 	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, &model->vertex[0]);
-	std::cout << "11" << std::endl;
 	glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, &model->texCoord[0]);
-	std::cout << "12" << std::endl;
 	glVertexAttribPointer(2, 3, GL_FLOAT, false, 0, &model->normal[0]);
-	std::cout << "13" << std::endl;
 	glEnableVertexAttribArray(0);
-	std::cout << "14" << std::endl;
 	glEnableVertexAttribArray(1);
-	std::cout << "15" << std::endl;
 	glEnableVertexAttribArray(2);
-	std::cout << "16" << std::endl;
-
 	unsigned short * tmp = &model->faces["default"][0];
-	std::cout << "17" << std::endl;
 	glDrawElements(GL_TRIANGLES, model->faces["default"].size(), GL_UNSIGNED_SHORT, tmp);
-	std::cout << "18" << std::endl;
 }
