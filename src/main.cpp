@@ -43,6 +43,7 @@ glm::vec3 sunColor = glm::vec3(1.0f, 0.5f, 0.2f);
 glm::mat4 planetDefaultMatrix = glm::translate(glm::vec3(0.0f));
 
 glm::quat rotation = glm::quat(1, 0, 0, 0);
+float shipAngle = glm::radians(180.0f);
 
 GLuint textureAsteroid;
 GLuint textureAsteroid_normals;
@@ -81,6 +82,7 @@ void keyboard(unsigned char key, int x, int y)
 	case 's': cameraPos -= cameraDir * moveSpeed; break;
 	case 'd': cameraPos += cameraSide * moveSpeed; break;
 	case 'a': cameraPos -= cameraSide * moveSpeed; break;
+	case 'm': shipAngle += glm::radians(2.0f); break;
 	}
 }
 
@@ -163,7 +165,7 @@ void drawObjects() {
 	float timeF = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
 	cameraMatrix = createCameraMatrix();
 	perspectiveMatrix = Core::createPerspectiveMatrix();
-	glm::mat4 shipInitialTransformation = glm::translate(glm::vec3(0, -0.25f, 0)) * glm::rotate(glm::radians(180.0f), glm::vec3(0, 1, 0)) * glm::scale(glm::vec3(0.0008f));
+	glm::mat4 shipInitialTransformation = glm::translate(glm::vec3(0, -0.25f, 0)) * glm::rotate(shipAngle, glm::vec3(0, 1, 0)) * glm::scale(glm::vec3(0.0008f));
 	glm::mat4 shipModelMatrix = glm::translate(cameraPos + cameraDir * 0.5f) * glm::mat4_cast(glm::inverse(rotation)) * shipInitialTransformation;
 	glm::mat4 planetRotation = glm::rotate(3.14f / 2.f * timeF / 2, glm::vec3(0.0f, 1.0f, 0.0f));
 
