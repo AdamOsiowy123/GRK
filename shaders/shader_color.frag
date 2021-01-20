@@ -23,8 +23,8 @@ void main()
 	float specular2 = pow(max(dot(R2, viewDirection), 0.0), 250);
 	float distance = length(vertexPos - lightPos);
 	float distance2 = length(vertexPos - lightPos2);
-	float attenuation = clamp( 40.0 / distance, 0.0, 1.0);
-	float attenuation2 = clamp( 40.0 / distance2, 0.0, 1.0);
+	float attenuation = clamp( 400.0 / distance, 0.0, 1.0);
+	float attenuation2 = clamp( 400.0 / distance2, 0.0, 1.0);
 	vec3 lightColor = vec3(1.0);
 	vec3 shadedColor = (objectColor * diffuse + lightColor * specular) * attenuation + (objectColor * diffuse2 + lightColor * specular2) * attenuation2;
 	float ambient = 0.2;

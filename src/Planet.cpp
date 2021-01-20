@@ -28,3 +28,8 @@ std::shared_ptr<Planet> Planet::create(GLuint program, obj::Model* model, glm::m
 	planet_objects.push_back(planet);
 	return planet;
 }
+
+void Planet::setMatrix(glm::mat4 matrix)
+{
+	this->matrix = matrix;
+}
