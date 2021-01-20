@@ -135,7 +135,7 @@ void createObjects() {
 	std::shared_ptr<Sun> sun2 = Sun::create(programSun, &sphereModel, glm::translate(sunPos2) * glm::scale(glm::vec3(8 * 14.0f)), sunPos, sunPos2, textureSun);
 
 
-	for (int i = 0; i < 100; i++) {
+	for (int i = 0; i < 280; i++) {
 		std::shared_ptr<Asteroid> asteroid = Asteroid::create(programTexture, &sphereModel, glm::translate(wspolrzedne[i]), textureAsteroid, sunPos, sunPos2);
 	}
 
