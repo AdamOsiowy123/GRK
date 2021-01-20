@@ -37,7 +37,7 @@ glm::mat4 cameraMatrix, perspectiveMatrix;
 glm::vec3 lightDir = glm::normalize(glm::vec3(1.0f, -0.9f, -1.0f));
 
 glm::vec3 sunPos = glm::vec3(0.0f, 0.0f, 0.0f);
-glm::vec3 sunPos2 = glm::vec3(30.0f, -20.0f, -30.0f);
+glm::vec3 sunPos2 = glm::vec3(1000.0f, -800.0f, -500.0f);
 glm::vec3 sunColor = glm::vec3(1.0f, 0.5f, 0.2f);
 
 glm::mat4 planetDefaultMatrix = glm::translate(glm::vec3(0.0f));
@@ -118,27 +118,44 @@ void createObjects() {
 		glm::vec2 asteroid2D = glm::circularRand(550.0f);
 		wspolrzedne[i] = glm::vec3(asteroid2D.x, rand() % 50 - 50, asteroid2D.y);
 	}
+	for (int i = 140; i < 210; i++) {
+		glm::vec2 asteroid2D = glm::circularRand(500.0f);
+		wspolrzedne[i] = glm::vec3(asteroid2D.x + sunPos2.x, rand() % 50 - 50 + sunPos2.y, asteroid2D.y + sunPos2.z);
+	}
+	for (int i = 210; i < 280; i++) {
+		glm::vec2 asteroid2D = glm::circularRand(550.0f);
+		wspolrzedne[i] = glm::vec3(asteroid2D.x + sunPos2.x, rand() % 50 - 50 + sunPos2.y, asteroid2D.y + sunPos2.z);
+	}
 	ostatniX = 300;
 	ostatniY = 300;
 
 	std::shared_ptr<Ship>  ship = Ship::create(programColor, &shipModel, sunPos, sunPos2, glm::vec3(0.6f));
 
 	std::shared_ptr<Sun> sun1 = Sun::create(programSun, &sphereModel, glm::translate(sunPos) * glm::scale(glm::vec3(8 * 14.0f)),sunPos,sunPos2,textureSun);
-	//std::shared_ptr<Sun> sun2 = Sun::create(programSun, &sphereModel, glm::translate(sunPos2) * glm::scale(glm::vec3(2.0f)), sunPos, sunPos2, sunColor);
+	std::shared_ptr<Sun> sun2 = Sun::create(programSun, &sphereModel, glm::translate(sunPos2) * glm::scale(glm::vec3(8 * 14.0f)), sunPos, sunPos2, textureSun);
 
 
 	for (int i = 0; i < 100; i++) {
 		std::shared_ptr<Asteroid> asteroid = Asteroid::create(programTexture, &sphereModel, glm::translate(wspolrzedne[i]), textureAsteroid, sunPos, sunPos2);
 	}
 
-	std::shared_ptr<Planet> planet = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureMercury, sunPos, sunPos2);
-	std::shared_ptr<Planet> planet2 = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureVenus, sunPos, sunPos2);
-	std::shared_ptr<Planet> planet3 = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureEarth, sunPos, sunPos2);
-	std::shared_ptr<Planet> planet4 = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureMars, sunPos, sunPos2);
-	std::shared_ptr<Planet> planet5 = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureJupiter, sunPos, sunPos2);
-	std::shared_ptr<Planet> planet6 = Planet::create(programTexture, &saturnModel, planetDefaultMatrix, textureSaturn, sunPos, sunPos2);
-	std::shared_ptr<Planet> planet7 = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureUranus, sunPos, sunPos2);
-	std::shared_ptr<Planet> planet8 = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureNeptune, sunPos, sunPos2);
+	std::shared_ptr<Planet> mercury = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureMercury, sunPos, sunPos2);
+	std::shared_ptr<Planet> venus = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureVenus, sunPos, sunPos2);
+	std::shared_ptr<Planet> earth = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureEarth, sunPos, sunPos2);
+	std::shared_ptr<Planet> mars = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureMars, sunPos, sunPos2);
+	std::shared_ptr<Planet> jupiter = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureJupiter, sunPos, sunPos2);
+	std::shared_ptr<Planet> saturn = Planet::create(programTexture, &saturnModel, planetDefaultMatrix, textureSaturn, sunPos, sunPos2);
+	std::shared_ptr<Planet> uranus = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureUranus, sunPos, sunPos2);
+	std::shared_ptr<Planet> neptune = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureNeptune, sunPos, sunPos2);
+
+	std::shared_ptr<Planet> mercury2 = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureMercury, sunPos, sunPos2);
+	std::shared_ptr<Planet> venus2 = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureVenus, sunPos, sunPos2);
+	std::shared_ptr<Planet> earth2 = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureEarth, sunPos, sunPos2);
+	std::shared_ptr<Planet> mars2 = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureMars, sunPos, sunPos2);
+	std::shared_ptr<Planet> jupiter2 = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureJupiter, sunPos, sunPos2);
+	std::shared_ptr<Planet> saturn2 = Planet::create(programTexture, &saturnModel, planetDefaultMatrix, textureSaturn, sunPos, sunPos2);
+	std::shared_ptr<Planet> uranus2 = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureUranus, sunPos, sunPos2);
+	std::shared_ptr<Planet> neptune2 = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureNeptune, sunPos, sunPos2);
 
 }
 
@@ -185,6 +202,30 @@ void drawObjects() {
 		}
 		if (counter == 7) {
 			obj->setMatrix(glm::translate(glm::vec3(sunPos.x + -1700.0f * sinf(timeF / 22), sunPos.y, sunPos.z + -1700.0f * cosf(timeF / 22))) * planetRotation * glm::scale(glm::vec3(39.0f)));
+		}
+		if (counter == 8) {
+			obj->setMatrix(glm::translate(glm::vec3(sunPos2.x + 170.0f * sinf(timeF / 8), sunPos2.y, sunPos2.z + 170.0f * cosf(timeF / 8))) * planetRotation * glm::scale(glm::vec3(20 * 0.48f)));
+		}
+		if (counter == 9) {
+			obj->setMatrix(glm::translate(glm::vec3(sunPos2.x + -260.0f * sinf(timeF / 10), sunPos2.y, sunPos2.z + -260.0f * cosf(timeF / 10))) * planetRotation * glm::scale(glm::vec3(15 * 1.21f)));
+		}
+		if (counter == 10) {
+			obj->setMatrix(glm::translate(glm::vec3(sunPos2.x + 350.0f * sinf(timeF / 12), sunPos2.y, sunPos2.z + 350.0f * cosf(timeF / 12))) * planetRotation * glm::scale(glm::vec3(15 * 1.27f)));
+		}
+		if (counter == 11) {
+			obj->setMatrix(glm::translate(glm::vec3(sunPos2.x + -440.0f * sinf(timeF / 14), sunPos2.y, sunPos2.z + -440.0 * cosf(timeF / 14))) * planetRotation * glm::scale(glm::vec3(20 * 0.68f)));
+		}
+		if (counter == 12) {
+			obj->setMatrix(glm::translate(glm::vec3(sunPos2.x + 800.0f * sinf(timeF / 16), sunPos2.y, sunPos2.z + 800.0f * cosf(timeF / 16))) * planetRotation * glm::scale(glm::vec3(7 * 7.1f)));
+		}
+		if (counter == 13) {
+			obj->setMatrix(glm::translate(glm::vec3(sunPos2.x + -1100.0f * sinf(timeF / 18), sunPos2.y, sunPos2.z + -1100.0f * cosf(timeF / 18))) * planetRotation * glm::rotate(glm::radians(90.0f), glm::vec3(1, 0, 0)) * glm::scale(glm::vec3(6.0f / 40)));
+		}
+		if (counter == 14) {
+			obj->setMatrix(glm::translate(glm::vec3(sunPos2.x + 1400.0f * sinf(timeF / 20), sunPos2.y, sunPos2.z + 1400.0f * cosf(timeF / 20))) * planetRotation * glm::scale(glm::vec3(40.0f)));
+		}
+		if (counter == 15) {
+			obj->setMatrix(glm::translate(glm::vec3(sunPos2.x + -1700.0f * sinf(timeF / 22), sunPos2.y, sunPos2.z + -1700.0f * cosf(timeF / 22))) * planetRotation * glm::scale(glm::vec3(39.0f)));
 		}
 
 		obj->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);

@@ -43,8 +43,8 @@ void main()
 
 	
 	vec3 lightColor = vec3(1);
-	float attenuation = clamp( 400.0 / distance, 0.0, 1.0);
-	float attenuation2 = clamp( 400.0 / distance2, 0.0, 1.0);
+	float attenuation = clamp( 500.0 / distance, 0.0, 1.0);
+	float attenuation2 = clamp( 500.0 / distance2, 0.0, 1.0);
 	vec3 shadedColor = (color * diffuse + lightColor * specular) * attenuation + (color * diffuse2 + lightColor * specular2) * attenuation2;
 	
 	float ambient = 0.2;
