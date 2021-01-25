@@ -19,13 +19,14 @@
 GLuint programColor;
 GLuint programTexture;
 GLuint programSun;
-
+GLuint programSight;
 
 Core::Shader_Loader shaderLoader;
 
 obj::Model shipModel;
 obj::Model sphereModel;
 obj::Model saturnModel;
+obj::Model planeModel;
 
 glm::vec3 cameraPos = glm::vec3(300, 2, 300);
 glm::vec3 cameraDir; // Wektor "do przodu" kamery
@@ -62,11 +63,12 @@ GLuint textureId;
 glm::vec3 wspolrzedne[400];
 int roznicaX;
 int roznicaY;
-int ostatniX;
-int ostatniY;
+int ostatniX = 300;
+int ostatniY = 300;
 int roznicaZ;
 int counter = 0;
 
+bool mouseKeyDown = false;
 
 void keyboard(unsigned char key, int x, int y)
 {
@@ -92,6 +94,20 @@ void mouse(int x, int y)
 	roznicaY = y - ostatniY;
 	ostatniX = x;
 	ostatniY = y;
+}
+
+void mouseClick(int button, int state, int x, int y) {
+	if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN) {
+		if (mouseKeyDown) {
+			mouseKeyDown = false;
+			cameraPos -= cameraDir * 50.0f;
+		}
+		else {
+			mouseKeyDown = true;
+			cameraPos += cameraDir * 50.0f;
+		}
+	}
+	std::cout << mouseKeyDown << std::endl;
 }
 
 glm::mat4 createCameraMatrix()
@@ -128,8 +144,6 @@ void createObjects() {
 		glm::vec2 asteroid2D = glm::circularRand(550.0f);
 		wspolrzedne[i] = glm::vec3(asteroid2D.x + sunPos2.x, rand() % 50 - 50 + sunPos2.y, asteroid2D.y + sunPos2.z);
 	}
-	ostatniX = 300;
-	ostatniY = 300;
 
 	std::shared_ptr<Ship>  ship = Ship::create(programColor, &shipModel, sunPos, sunPos2, glm::vec3(0.6f));
 
@@ -159,16 +173,24 @@ void createObjects() {
 	std::shared_ptr<Planet> uranus2 = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureUranus, sunPos, sunPos2);
 	std::shared_ptr<Planet> neptune2 = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureNeptune, sunPos, sunPos2);
 
+	std::shared_ptr<Planet> gunSight1 = Planet::create(programSight, &planeModel, planetDefaultMatrix, sunPos, sunPos2);
+	std::shared_ptr<Planet> gunSight2 = Planet::create(programSight, &planeModel, planetDefaultMatrix, sunPos, sunPos2);
 }
 
 void drawObjects() {
 	float timeF = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
 	cameraMatrix = createCameraMatrix();
 	perspectiveMatrix = Core::createPerspectiveMatrix();
-	glm::mat4 shipInitialTransformation = glm::translate(glm::vec3(0, -0.25f, 0)) * glm::rotate(shipAngle, glm::vec3(0, 1, 0)) * glm::scale(glm::vec3(0.0008f));
-	glm::mat4 shipModelMatrix = glm::translate(cameraPos + cameraDir * 0.5f) * glm::mat4_cast(glm::inverse(rotation)) * shipInitialTransformation;
+	glm::mat4 shipModelMatrix;
+	glm::mat4 shipInitialTransformation;
+	if (!mouseKeyDown) {
+		shipInitialTransformation = glm::translate(glm::vec3(0, -0.25f, 0)) * glm::rotate(shipAngle, glm::vec3(0, 1, 0)) * glm::scale(glm::vec3(0.0008f));
+	}
+	else {
+		shipInitialTransformation = glm::translate(glm::vec3(0, -0.15f, 0.3f)) * glm::rotate(shipAngle, glm::vec3(0, 1, 0)) * glm::scale(glm::vec3(0.0008f));
+	}
+	shipModelMatrix = glm::translate(cameraPos + cameraDir * 0.5f) * glm::mat4_cast(glm::inverse(rotation)) * shipInitialTransformation;
 	glm::mat4 planetRotation = glm::rotate(3.14f / 2.f * timeF / 2, glm::vec3(0.0f, 1.0f, 0.0f));
-
 
 	for (auto obj : Ship::ship_objects) {
 		obj->setMatrix(shipModelMatrix);
@@ -229,8 +251,15 @@ void drawObjects() {
 		if (counter == 15) {
 			obj->setMatrix(glm::translate(glm::vec3(sunPos2.x + -1700.0f * sinf(timeF / 22), sunPos2.y, sunPos2.z + -1700.0f * cosf(timeF / 22))) * planetRotation * glm::scale(glm::vec3(39.0f)));
 		}
-
 		obj->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);
+		if (counter == 16 && mouseKeyDown) {
+			obj->setMatrix(glm::translate(glm::vec3(cameraPos.x + (cameraDir.x * 0.5f), cameraPos.y + (cameraDir.y * 0.5f), cameraPos.z + (cameraDir.z * 0.5f))) * glm::mat4_cast(glm::inverse(rotation)) * glm::rotate(shipAngle, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::scale(glm::vec3(0.015f, 0.001f, 0.015f)));
+			obj->draw(glm::vec3(1.0f), cameraPos, perspectiveMatrix, cameraMatrix);
+		}
+		if (counter == 17 && mouseKeyDown) {
+			obj->setMatrix(glm::translate(glm::vec3(cameraPos.x + (cameraDir.x * 0.5f), cameraPos.y + (cameraDir.y * 0.5f), cameraPos.z + (cameraDir.z * 0.5f))) * glm::mat4_cast(glm::inverse(rotation)) * glm::rotate(shipAngle, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::scale(glm::vec3(0.001f, 0.015f, 0.001f)));
+			obj->draw(glm::vec3(1.0f), cameraPos, perspectiveMatrix, cameraMatrix);
+		}
 		counter++;
 	}
 	counter = 0;
@@ -241,7 +270,7 @@ void renderScene()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.1f, 0.3f, 1.0f);
 	drawObjects();
-
+	
 	glutSwapBuffers();
 }
 
@@ -252,8 +281,10 @@ void init()
 	programColor = shaderLoader.CreateProgram("shaders/shader_color.vert", "shaders/shader_color.frag");
 	programTexture = shaderLoader.CreateProgram("shaders/shader_tex.vert", "shaders/shader_tex.frag");
 	programSun = shaderLoader.CreateProgram("shaders/shader_sun.vert", "shaders/shader_sun.frag");
+	programSight = shaderLoader.CreateProgram("shaders/shader_sight.vert", "shaders/shader_sight.frag");
 	sphereModel = obj::loadModelFromFile("models/sphere.obj");
 	shipModel = obj::loadModelFromFile("models/wraith.obj");
+	planeModel = obj::loadModelFromFile("models/plane.obj");
 	saturnModel = obj::loadModelFromFile("models/saturn.obj");
 	textureAsteroid = Core::LoadTexture("textures/asteroid.png");
 	textureAsteroid_normals = Core::LoadTexture("textures/asteroid_normals.png");
@@ -295,6 +326,7 @@ int main(int argc, char ** argv)
 	init();
 	glutKeyboardFunc(keyboard);
 	glutPassiveMotionFunc(mouse);
+	glutMouseFunc(mouseClick);
 	glutDisplayFunc(renderScene);
 	glutIdleFunc(idle);
 
