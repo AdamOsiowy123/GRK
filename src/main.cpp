@@ -20,6 +20,7 @@ GLuint programColor;
 GLuint programTexture;
 GLuint programSun;
 GLuint programSight;
+GLuint programBump;
 
 Core::Shader_Loader shaderLoader;
 
@@ -152,7 +153,8 @@ void createObjects() {
 
 
 	for (int i = 0; i < 280; i++) {
-		std::shared_ptr<Asteroid> asteroid = Asteroid::create(programTexture, &sphereModel, glm::translate(wspolrzedne[i]), textureAsteroid, sunPos, sunPos2);
+		std::shared_ptr<Asteroid> asteroid = Asteroid::create(programBump, &sphereModel, glm::translate(wspolrzedne[i]), textureAsteroid, sunPos, sunPos2);
+		asteroid->setNormal(textureAsteroid_normals);
 	}
 
 	std::shared_ptr<Planet> mercury = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureMercury, sunPos, sunPos2);
@@ -282,6 +284,7 @@ void init()
 	programTexture = shaderLoader.CreateProgram("shaders/shader_tex.vert", "shaders/shader_tex.frag");
 	programSun = shaderLoader.CreateProgram("shaders/shader_sun.vert", "shaders/shader_sun.frag");
 	programSight = shaderLoader.CreateProgram("shaders/shader_sight.vert", "shaders/shader_sight.frag");
+	programBump = shaderLoader.CreateProgram("shaders/shader_bump.vert", "shaders/shader_bump.frag");
 	sphereModel = obj::loadModelFromFile("models/sphere.obj");
 	shipModel = obj::loadModelFromFile("models/wraith.obj");
 	planeModel = obj::loadModelFromFile("models/plane.obj");
