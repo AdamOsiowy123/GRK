@@ -68,8 +68,11 @@ int ostatniX = 300;
 int ostatniY = 300;
 int roznicaZ;
 int counter = 0;
+glm::quat lastRotation;
+glm::mat4 lastCameraMatrix;
 
 bool mouseKeyDown = false;
+bool freeLook = false;
 
 void keyboard(unsigned char key, int x, int y)
 {
@@ -86,6 +89,7 @@ void keyboard(unsigned char key, int x, int y)
 	case 'd': cameraPos += cameraSide * moveSpeed; break;
 	case 'a': cameraPos -= cameraSide * moveSpeed; break;
 	case 'm': shipAngle += glm::radians(2.0f); break;
+	case 'f': freeLook = !freeLook; lastRotation = rotation; break;
 	}
 }
 
@@ -108,7 +112,6 @@ void mouseClick(int button, int state, int x, int y) {
 			cameraPos += cameraDir * 50.0f;
 		}
 	}
-	std::cout << mouseKeyDown << std::endl;
 }
 
 glm::mat4 createCameraMatrix()
@@ -191,7 +194,13 @@ void drawObjects() {
 	else {
 		shipInitialTransformation = glm::translate(glm::vec3(0, -0.15f, 0.3f)) * glm::rotate(shipAngle, glm::vec3(0, 1, 0)) * glm::scale(glm::vec3(0.0008f));
 	}
-	shipModelMatrix = glm::translate(cameraPos + cameraDir * 0.5f) * glm::mat4_cast(glm::inverse(rotation)) * shipInitialTransformation;
+	if (freeLook) {
+		shipModelMatrix = glm::translate(cameraPos + cameraDir * 0.5f) * glm::mat4_cast(glm::inverse(lastRotation)) * shipInitialTransformation;
+	}
+	else {
+		
+		shipModelMatrix = glm::translate(cameraPos + cameraDir * 0.5f) * glm::mat4_cast(glm::inverse(rotation)) * shipInitialTransformation;
+	}
 	glm::mat4 planetRotation = glm::rotate(3.14f / 2.f * timeF / 2, glm::vec3(0.0f, 1.0f, 0.0f));
 
 	for (auto obj : Ship::ship_objects) {
