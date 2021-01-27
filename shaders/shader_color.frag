@@ -22,7 +22,7 @@ void main()
 		objColor = vec3(1.0f, 1.0f, 0.0f) * 1.2f;
 	}
 	else if(cosX <= 0.7f && cosX > 0.6f){
-		objColor = vec3(0.0f, 1.0f, 0.0f);
+		objColor = vec3(0.0f, 0.0f, 0.0f);
 	}
 	else{
 		objColor = vec3(0.368f * (cosX/1.5f + 1.5f), (cosX/1.5f + 1.5f) * 0.631f, (cosX/1.5f + 1.5f));
