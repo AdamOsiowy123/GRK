@@ -43,6 +43,7 @@ glm::vec3 sunPos2 = glm::vec3(1000.0f, -800.0f, -500.0f);
 glm::vec3 sunColor = glm::vec3(1.0f, 0.5f, 0.2f);
 
 glm::mat4 planetDefaultMatrix = glm::translate(glm::vec3(0.0f));
+glm::mat4 sightDefaultMatrix = glm::translate(glm::vec3(100000.0f));
 
 glm::quat rotation = glm::quat(1, 0, 0, 0);
 float shipAngle = glm::radians(180.0f);
@@ -178,8 +179,8 @@ void createObjects() {
 	std::shared_ptr<Planet> uranus2 = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureUranus, sunPos, sunPos2);
 	std::shared_ptr<Planet> neptune2 = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureNeptune, sunPos, sunPos2);
 
-	std::shared_ptr<Planet> gunSight1 = Planet::create(programSight, &planeModel, planetDefaultMatrix, sunPos, sunPos2);
-	std::shared_ptr<Planet> gunSight2 = Planet::create(programSight, &planeModel, planetDefaultMatrix, sunPos, sunPos2);
+	std::shared_ptr<Planet> gunSight1 = Planet::create(programSight, &planeModel, sightDefaultMatrix, sunPos, sunPos2);
+	std::shared_ptr<Planet> gunSight2 = Planet::create(programSight, &planeModel, sightDefaultMatrix, sunPos, sunPos2);
 }
 
 void drawObjects() {
