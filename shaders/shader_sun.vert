@@ -7,6 +7,7 @@ layout(location = 2) in vec3 vertexNormal;
 uniform mat4 modelViewProjectionMatrix;
 uniform mat4 modelMatrix;
 
+out vec2 interpTexCoord;
 out vec3 interpNormal;
 out vec3 vertexPos;
 
@@ -14,5 +15,6 @@ void main()
 {
 	gl_Position = modelViewProjectionMatrix * vec4(vertexPosition, 1.0);
 	interpNormal = vertexNormal;
+	interpTexCoord = vertexTexCoord;
 	vertexPos = vec3(modelMatrix * vec4(vertexPosition, 1.0));
 }
