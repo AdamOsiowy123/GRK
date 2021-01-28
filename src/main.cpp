@@ -28,6 +28,7 @@ obj::Model shipModel;
 obj::Model sphereModel;
 obj::Model saturnModel;
 obj::Model planeModel;
+obj::Model ufoModel;
 
 glm::vec3 cameraPos = glm::vec3(300, 2, 300);
 glm::vec3 cameraDir; // Wektor "do przodu" kamery
@@ -60,20 +61,48 @@ GLuint textureUranus;
 GLuint textureNeptune;
 GLuint textureSun;
 
+glm::vec3 mercuryTranslate = glm::vec3(0.0f);
+glm::vec3 mercury2Translate = glm::vec3(0.0f);
+glm::vec3 venusTranslate = glm::vec3(0.0f);
+glm::vec3 venus2Translate = glm::vec3(0.0f);
+glm::vec3 earthTranslate = glm::vec3(0.0f);
+glm::vec3 earth2Translate = glm::vec3(0.0f);
+glm::vec3 marsTranslate = glm::vec3(0.0f);
+glm::vec3 mars2Translate = glm::vec3(0.0f);
+glm::vec3 jupiterTranslate = glm::vec3(0.0f);
+glm::vec3 jupiter2Translate = glm::vec3(0.0f);
+glm::vec3 saturnTranslate = glm::vec3(0.0f);
+glm::vec3 saturn2Translate = glm::vec3(0.0f);
+glm::vec3 uranusTranslate = glm::vec3(0.0f);
+glm::vec3 uranus2Translate = glm::vec3(0.0f);
+glm::vec3 neptuneTranslate = glm::vec3(0.0f);
+glm::vec3 neptune2Translate = glm::vec3(0.0f);
+
+
 GLuint textureId;
 
 glm::vec3 wspolrzedne[400];
+glm::vec3 wspolrzedneUfo[4] = {
+	glm::vec3(0.0f), glm::vec3(40.0f), glm::vec3(80.0f), glm::vec3(120.0f)
+};
+glm::vec3 wektor[4] = {
+	glm::vec3(0.0f), glm::vec3(40.0f), glm::vec3(80.0f), glm::vec3(120.0f)
+};
+
 int roznicaX;
 int roznicaY;
 int ostatniX = 300;
 int ostatniY = 300;
 int roznicaZ;
 int counter = 0;
+float lastTimeF = -1.0f;
 glm::quat lastRotation;
 glm::mat4 lastCameraMatrix;
 
 bool mouseKeyDown = false;
 bool freeLook = false;
+
+float appLoadingTime;
 
 void keyboard(unsigned char key, int x, int y)
 {
@@ -115,6 +144,57 @@ void mouseClick(int button, int state, int x, int y) {
 	}
 }
 
+glm::vec3 predictMove() {
+	float time = glutGet(GLUT_ELAPSED_TIME) / 1000.0f - appLoadingTime;
+	int sekundaRuchu = int(floorf(time));
+	float u³amekSekundy = time - sekundaRuchu;
+	wektor[0] = wspolrzedneUfo[(sekundaRuchu - 1) % 4];
+	wektor[1] = wspolrzedneUfo[(sekundaRuchu) % 4];
+	wektor[2] = wspolrzedneUfo[(sekundaRuchu + 1) % 4];
+	wektor[3] = wspolrzedneUfo[(sekundaRuchu + 2) % 4];
+	glm::vec3 catmull = glm::catmullRom(wektor[0], wektor[1], wektor[2], wektor[3], u³amekSekundy);
+	wspolrzedneUfo[0] = wspolrzedneUfo[1];
+	wspolrzedneUfo[1] = wspolrzedneUfo[2];
+	wspolrzedneUfo[2] = wspolrzedneUfo[3];
+	glm::vec3 newUfo3 = wspolrzedneUfo[3] + glm::sphericalRand(0.5f);
+	bool isCloser = glm::length(newUfo3 - (cameraPos + cameraDir * 0.5f)) < glm::length(wspolrzedneUfo[3] - (cameraPos + cameraDir * 0.5f));
+	bool isSun = glm::length(newUfo3 - sunPos) < 140.0f || glm::length(newUfo3 - sunPos2) < 140.0f;
+	bool isPlanet = glm::length(newUfo3 - mercuryTranslate) < 19.2f || glm::length(newUfo3 - mercury2Translate) < 19.2f || glm::length(newUfo3 - venusTranslate) < 36.3f
+		&& glm::length(newUfo3 - venus2Translate) < 36.3f || glm::length(newUfo3 - earthTranslate) < 38.1f || glm::length(newUfo3 - earth2Translate) < 38.1f
+		&& glm::length(newUfo3 - marsTranslate) < 27.2f || glm::length(newUfo3 - mars2Translate) < 38.1f || glm::length(newUfo3 - jupiterTranslate) < 100.0f
+		&& glm::length(newUfo3 - jupiter2Translate) < 100.0f || glm::length(newUfo3 - saturnTranslate) < 150.0f || glm::length(newUfo3 - saturn2Translate) < 150.0f
+		&& glm::length(newUfo3 - uranusTranslate) < 80.0f || glm::length(newUfo3 - uranus2Translate) < 80.0f || glm::length(newUfo3 - neptuneTranslate) < 78.0f
+		&& glm::length(newUfo3 - neptune2Translate) < 78.0f;
+	bool isAsteroid = false;
+	for (auto i : wspolrzedne) {
+		if (glm::length(newUfo3 - i) < 2.0f) {
+			isAsteroid = true;
+			break;
+		}
+	}
+	while (isCloser || (isSun || isPlanet || isAsteroid)) {
+		newUfo3 = wspolrzedneUfo[3] + glm::sphericalRand(0.5f);
+		isCloser = glm::length(newUfo3 - (cameraPos + cameraDir * 0.5f)) < glm::length(wspolrzedneUfo[3] - (cameraPos + cameraDir * 0.5f));
+		isSun = isSun = glm::length(newUfo3 - sunPos) < 140.0f || glm::length(newUfo3 - sunPos2) < 140.0f;
+		isPlanet = glm::length(newUfo3 - mercuryTranslate) < 19.2f || glm::length(newUfo3 - mercury2Translate) < 19.2f || glm::length(newUfo3 - venusTranslate) < 36.3f
+			&& glm::length(newUfo3 - venus2Translate) < 36.3f || glm::length(newUfo3 - earthTranslate) < 38.1f || glm::length(newUfo3 - earth2Translate) < 38.1f
+			&& glm::length(newUfo3 - marsTranslate) < 27.2f || glm::length(newUfo3 - mars2Translate) < 38.1f || glm::length(newUfo3 - jupiterTranslate) < 100.0f
+			&& glm::length(newUfo3 - jupiter2Translate) < 100.0f || glm::length(newUfo3 - saturnTranslate) < 150.0f || glm::length(newUfo3 - saturn2Translate) < 150.0f
+			&& glm::length(newUfo3 - uranusTranslate) < 80.0f || glm::length(newUfo3 - uranus2Translate) < 80.0f || glm::length(newUfo3 - neptuneTranslate) < 78.0f
+			&& glm::length(newUfo3 - neptune2Translate) < 78.0f;
+		isAsteroid = false;
+		for (auto i : wspolrzedne) {
+			if (glm::length(newUfo3 - i) < 2.0f) {
+				isAsteroid = true;
+				break;
+			}
+		}
+	}
+	wspolrzedneUfo[3] = newUfo3;
+	return catmull;
+}
+
+
 glm::mat4 createCameraMatrix()
 {
 	glm::quat Xangle = glm::angleAxis(glm::radians(roznicaX * 1.f), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -151,6 +231,7 @@ void createObjects() {
 	}
 
 	std::shared_ptr<Ship>  ship = Ship::create(programColor, &shipModel, sunPos, sunPos2, glm::vec3(0.6f));
+	std::shared_ptr<Ship> ufo = Ship::create(programColor, &ufoModel, sunPos, sunPos2, glm::vec3(0.6f));
 
 	std::shared_ptr<Sun> sun1 = Sun::create(programSun, &sphereModel, glm::translate(sunPos) * glm::scale(glm::vec3(8 * 14.0f)),sunPos,sunPos2,textureSun);
 	std::shared_ptr<Sun> sun2 = Sun::create(programSun, &sphereModel, glm::translate(sunPos2) * glm::scale(glm::vec3(8 * 14.0f)), sunPos, sunPos2, textureSun);
@@ -204,9 +285,17 @@ void drawObjects() {
 	}
 	glm::mat4 planetRotation = glm::rotate(3.14f / 2.f * timeF / 2, glm::vec3(0.0f, 1.0f, 0.0f));
 
+	int ctr = 0;
 	for (auto obj : Ship::ship_objects) {
-		obj->setMatrix(shipModelMatrix);
+		if (ctr == 0) {
+			obj->setMatrix(shipModelMatrix);
+		}
+		if (ctr == 1) {
+			obj->setMatrix(glm::translate(predictMove()) * glm::scale(glm::vec3(4.0f)));
+			
+		}
 		obj->draw(obj->getColor(), cameraPos, perspectiveMatrix, cameraMatrix);
+		ctr++;
 	}
 	for (auto obj : Sun::sun_objects) {
 		obj->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);
@@ -216,52 +305,68 @@ void drawObjects() {
 	}
 	for (auto obj : Planet::planet_objects) {
 		if (counter == 0) {
-			obj->setMatrix(glm::translate(glm::vec3(sunPos.x + 170.0f * sinf(timeF/8), sunPos.y, sunPos.z + 170.0f * cosf(timeF/8))) * planetRotation * glm::scale(glm::vec3(20 * 0.48f)));
+			mercuryTranslate = glm::vec3(sunPos.x + 170.0f * sinf(timeF / 8), sunPos.y, sunPos.z + 170.0f * cosf(timeF / 8));
+			obj->setMatrix(glm::translate(mercuryTranslate) * planetRotation * glm::scale(glm::vec3(20 * 0.48f)));
 		}
 		if (counter == 1) {
-			obj->setMatrix(glm::translate(glm::vec3(sunPos.x + -260.0f * sinf(timeF / 10), sunPos.y, sunPos.z + -260.0f * cosf(timeF / 10))) * planetRotation * glm::scale(glm::vec3(15 * 1.21f)));
+			venusTranslate = glm::vec3(sunPos.x + -260.0f * sinf(timeF / 10), sunPos.y, sunPos.z + -260.0f * cosf(timeF / 10));
+			obj->setMatrix(glm::translate(venusTranslate) * planetRotation * glm::scale(glm::vec3(15 * 1.21f)));
 		}
 		if (counter == 2) {
-			obj->setMatrix(glm::translate(glm::vec3(sunPos.x + 350.0f * sinf(timeF / 12), sunPos.y, sunPos.z + 350.0f * cosf(timeF / 12))) * planetRotation * glm::scale(glm::vec3(15 * 1.27f)));
+			earthTranslate = glm::vec3(sunPos.x + 350.0f * sinf(timeF / 12), sunPos.y, sunPos.z + 350.0f * cosf(timeF / 12));
+			obj->setMatrix(glm::translate(earthTranslate) * planetRotation * glm::scale(glm::vec3(15 * 1.27f)));
 		}
 		if (counter == 3) {
-			obj->setMatrix(glm::translate(glm::vec3(sunPos.x + -440.0f * sinf(timeF / 14), sunPos.y, sunPos.z + -440.0 * cosf(timeF / 14))) * planetRotation * glm::scale(glm::vec3(20 * 0.68f)));
+			marsTranslate = glm::vec3(sunPos.x + -440.0f * sinf(timeF / 14), sunPos.y, sunPos.z + -440.0 * cosf(timeF / 14));
+			obj->setMatrix(glm::translate(marsTranslate) * planetRotation * glm::scale(glm::vec3(20 * 0.68f)));
 		}
 		if (counter == 4) {
-			obj->setMatrix(glm::translate(glm::vec3(sunPos.x + 800.0f * sinf(timeF / 16), sunPos.y, sunPos.z + 800.0f * cosf(timeF / 16))) * planetRotation * glm::scale(glm::vec3(7 * 7.1f)));
+			jupiterTranslate = glm::vec3(sunPos.x + 800.0f * sinf(timeF / 16), sunPos.y, sunPos.z + 800.0f * cosf(timeF / 16));
+			obj->setMatrix(glm::translate(jupiterTranslate) * planetRotation * glm::scale(glm::vec3(7 * 7.1f)));
 		}
 		if (counter == 5) {
-			obj->setMatrix(glm::translate(glm::vec3(sunPos.x + -1100.0f * sinf(timeF / 18), sunPos.y, sunPos.z + -1100.0f * cosf(timeF / 18))) * planetRotation * glm::rotate(glm::radians(90.0f), glm::vec3(1, 0, 0)) *glm::scale(glm::vec3(6.0f / 40)));
+			saturnTranslate = glm::vec3(sunPos.x + -1100.0f * sinf(timeF / 18), sunPos.y, sunPos.z + -1100.0f * cosf(timeF / 18));
+			obj->setMatrix(glm::translate(saturnTranslate) * planetRotation * glm::rotate(glm::radians(90.0f), glm::vec3(1, 0, 0)) *glm::scale(glm::vec3(6.0f / 40)));
 		}
 		if (counter == 6) {
-			obj->setMatrix(glm::translate(glm::vec3(sunPos.x + 1400.0f * sinf(timeF / 20), sunPos.y, sunPos.z + 1400.0f * cosf(timeF / 20))) * planetRotation * glm::scale(glm::vec3(40.0f)));
+			uranusTranslate = glm::vec3(sunPos.x + 1400.0f * sinf(timeF / 20), sunPos.y, sunPos.z + 1400.0f * cosf(timeF / 20));
+			obj->setMatrix(glm::translate(uranusTranslate) * planetRotation * glm::scale(glm::vec3(40.0f)));
 		}
 		if (counter == 7) {
-			obj->setMatrix(glm::translate(glm::vec3(sunPos.x + -1700.0f * sinf(timeF / 22), sunPos.y, sunPos.z + -1700.0f * cosf(timeF / 22))) * planetRotation * glm::scale(glm::vec3(39.0f)));
+			neptuneTranslate = glm::vec3(sunPos.x + -1700.0f * sinf(timeF / 22), sunPos.y, sunPos.z + -1700.0f * cosf(timeF / 22));
+			obj->setMatrix(glm::translate(neptuneTranslate) * planetRotation * glm::scale(glm::vec3(39.0f)));
 		}
 		if (counter == 8) {
-			obj->setMatrix(glm::translate(glm::vec3(sunPos2.x + 170.0f * sinf(timeF / 8), sunPos2.y, sunPos2.z + 170.0f * cosf(timeF / 8))) * planetRotation * glm::scale(glm::vec3(20 * 0.48f)));
+			mercury2Translate = glm::vec3(sunPos2.x + 170.0f * sinf(timeF / 8), sunPos2.y, sunPos2.z + 170.0f * cosf(timeF / 8));
+			obj->setMatrix(glm::translate(mercury2Translate) * planetRotation * glm::scale(glm::vec3(20 * 0.48f)));
 		}
 		if (counter == 9) {
-			obj->setMatrix(glm::translate(glm::vec3(sunPos2.x + -260.0f * sinf(timeF / 10), sunPos2.y, sunPos2.z + -260.0f * cosf(timeF / 10))) * planetRotation * glm::scale(glm::vec3(15 * 1.21f)));
+			venus2Translate = glm::vec3(sunPos2.x + -260.0f * sinf(timeF / 10), sunPos2.y, sunPos2.z + -260.0f * cosf(timeF / 10));
+			obj->setMatrix(glm::translate(venus2Translate) * planetRotation * glm::scale(glm::vec3(15 * 1.21f)));
 		}
 		if (counter == 10) {
-			obj->setMatrix(glm::translate(glm::vec3(sunPos2.x + 350.0f * sinf(timeF / 12), sunPos2.y, sunPos2.z + 350.0f * cosf(timeF / 12))) * planetRotation * glm::scale(glm::vec3(15 * 1.27f)));
+			earth2Translate = glm::vec3(sunPos2.x + 350.0f * sinf(timeF / 12), sunPos2.y, sunPos2.z + 350.0f * cosf(timeF / 12));
+			obj->setMatrix(glm::translate(earth2Translate) * planetRotation * glm::scale(glm::vec3(15 * 1.27f)));
 		}
 		if (counter == 11) {
-			obj->setMatrix(glm::translate(glm::vec3(sunPos2.x + -440.0f * sinf(timeF / 14), sunPos2.y, sunPos2.z + -440.0 * cosf(timeF / 14))) * planetRotation * glm::scale(glm::vec3(20 * 0.68f)));
+			mars2Translate = glm::vec3(sunPos2.x + -440.0f * sinf(timeF / 14), sunPos2.y, sunPos2.z + -440.0 * cosf(timeF / 14));
+			obj->setMatrix(glm::translate(mars2Translate) * planetRotation * glm::scale(glm::vec3(20 * 0.68f)));
 		}
 		if (counter == 12) {
-			obj->setMatrix(glm::translate(glm::vec3(sunPos2.x + 800.0f * sinf(timeF / 16), sunPos2.y, sunPos2.z + 800.0f * cosf(timeF / 16))) * planetRotation * glm::scale(glm::vec3(7 * 7.1f)));
+			jupiter2Translate = glm::vec3(sunPos2.x + 800.0f * sinf(timeF / 16), sunPos2.y, sunPos2.z + 800.0f * cosf(timeF / 16));
+			obj->setMatrix(glm::translate(jupiter2Translate) * planetRotation * glm::scale(glm::vec3(7 * 7.1f)));
 		}
 		if (counter == 13) {
-			obj->setMatrix(glm::translate(glm::vec3(sunPos2.x + -1100.0f * sinf(timeF / 18), sunPos2.y, sunPos2.z + -1100.0f * cosf(timeF / 18))) * planetRotation * glm::rotate(glm::radians(90.0f), glm::vec3(1, 0, 0)) * glm::scale(glm::vec3(6.0f / 40)));
+			saturn2Translate = glm::vec3(sunPos2.x + -1100.0f * sinf(timeF / 18), sunPos2.y, sunPos2.z + -1100.0f * cosf(timeF / 18));
+			obj->setMatrix(glm::translate(saturn2Translate) * planetRotation * glm::rotate(glm::radians(90.0f), glm::vec3(1, 0, 0)) * glm::scale(glm::vec3(6.0f / 40)));
 		}
 		if (counter == 14) {
-			obj->setMatrix(glm::translate(glm::vec3(sunPos2.x + 1400.0f * sinf(timeF / 20), sunPos2.y, sunPos2.z + 1400.0f * cosf(timeF / 20))) * planetRotation * glm::scale(glm::vec3(40.0f)));
+			uranus2Translate = glm::vec3(sunPos2.x + 1400.0f * sinf(timeF / 20), sunPos2.y, sunPos2.z + 1400.0f * cosf(timeF / 20));
+			obj->setMatrix(glm::translate(uranus2Translate) * planetRotation * glm::scale(glm::vec3(40.0f)));
 		}
 		if (counter == 15) {
-			obj->setMatrix(glm::translate(glm::vec3(sunPos2.x + -1700.0f * sinf(timeF / 22), sunPos2.y, sunPos2.z + -1700.0f * cosf(timeF / 22))) * planetRotation * glm::scale(glm::vec3(39.0f)));
+			neptune2Translate = glm::vec3(sunPos2.x + -1700.0f * sinf(timeF / 22), sunPos2.y, sunPos2.z + -1700.0f * cosf(timeF / 22));
+			obj->setMatrix(glm::translate(neptune2Translate) * planetRotation * glm::scale(glm::vec3(39.0f)));
 		}
 		obj->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);
 		if (counter == 16 && mouseKeyDown) {
@@ -299,6 +404,7 @@ void init()
 	shipModel = obj::loadModelFromFile("models/wraith.obj");
 	planeModel = obj::loadModelFromFile("models/plane.obj");
 	saturnModel = obj::loadModelFromFile("models/saturn.obj");
+	ufoModel = obj::loadModelFromFile("models/ufo.obj");
 	textureAsteroid = Core::LoadTexture("textures/asteroid.png");
 	textureAsteroid_normals = Core::LoadTexture("textures/asteroid_normals.png");
 	textureJupiter = Core::LoadTexture("textures/jupiter.png");
@@ -312,7 +418,7 @@ void init()
 	textureSun = Core::LoadTexture("textures/sun.png");
 
 	createObjects();
-	
+	appLoadingTime = glutGet(GLUT_ELAPSED_TIME)/1000.0f;
 }
 
 void shutdown()

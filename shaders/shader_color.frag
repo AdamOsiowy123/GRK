@@ -14,12 +14,18 @@ void main()
 {
 
 	float cosX = cos(3.14 + vertexPos2.x * 3.14 /80);
+	float cosZ = cos(3.14 + vertexPos2.z * exp(vertexPos2.z/280));
 	vec3 objColor;
 	if(cosX > 0.7 && cosX <= 0.85f){
 		objColor = vec3(1.0f, 1.0f, 1.0f) * 1.2f;
 	}
 	else if(cosX > 0.85f){
-		objColor = vec3(1.0f, 1.0f, 0.0f) * 1.2f;
+		if(cosZ > 0){
+			objColor = vec3(1.0f, 1.0f, 0.0f) * 1.2f;
+		}
+		else{
+			objColor = vec3(0.0f, 0.0f, 0.0f) * 1.0f;
+		}
 	}
 	else if(cosX <= 0.7f && cosX > 0.6f){
 		objColor = vec3(0.0f, 0.0f, 0.0f);
