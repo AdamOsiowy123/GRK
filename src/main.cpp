@@ -5,6 +5,8 @@
 #include <iostream>
 #include <cmath>
 #include <vector>
+#include <stdlib.h>
+#include <cstdio>
 
 #include "Shader_Loader.h"
 #include "Render_Utils.h"
@@ -14,8 +16,10 @@
 #include "Planet.h"
 #include "Sun.h"
 #include "Ship.h"
+#include "Skybox.h"
 #include <memory>
 
+GLuint programSkybox;
 GLuint programColor;
 GLuint programTexture;
 GLuint programSun;
@@ -268,6 +272,7 @@ void drawObjects() {
 	float timeF = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
 	cameraMatrix = createCameraMatrix();
 	perspectiveMatrix = Core::createPerspectiveMatrix();
+
 	glm::mat4 shipModelMatrix;
 	glm::mat4 shipInitialTransformation;
 	if (!mouseKeyDown) {
@@ -386,7 +391,10 @@ void renderScene()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.1f, 0.3f, 1.0f);
+
 	drawObjects();
+
+	Skybox::renderSkybox(programSkybox, cameraMatrix, perspectiveMatrix);
 	
 	glutSwapBuffers();
 }
@@ -400,6 +408,7 @@ void init()
 	programSun = shaderLoader.CreateProgram("shaders/shader_sun.vert", "shaders/shader_sun.frag");
 	programSight = shaderLoader.CreateProgram("shaders/shader_sight.vert", "shaders/shader_sight.frag");
 	programBump = shaderLoader.CreateProgram("shaders/shader_bump.vert", "shaders/shader_bump.frag");
+	programSkybox = shaderLoader.CreateProgram("shaders/shader_skybox.vert", "shaders/shader_skybox.frag");
 	sphereModel = obj::loadModelFromFile("models/sphere.obj");
 	shipModel = obj::loadModelFromFile("models/wraith.obj");
 	planeModel = obj::loadModelFromFile("models/plane.obj");
@@ -419,12 +428,15 @@ void init()
 
 	createObjects();
 	appLoadingTime = glutGet(GLUT_ELAPSED_TIME)/1000.0f;
+
+	Skybox::initSkybox();
 }
 
 void shutdown()
 {
 	shaderLoader.DeleteProgram(programColor);
 	shaderLoader.DeleteProgram(programTexture);
+	shaderLoader.DeleteProgram(programSkybox);
 	shaderLoader.DeleteProgram(programSun);
 }
 
@@ -437,8 +449,8 @@ int main(int argc, char ** argv)
 {
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
-	glutInitWindowPosition(200, 200);
-	glutInitWindowSize(600, 600);
+	glutInitWindowPosition(500, 30);
+	glutInitWindowSize(650, 650);
 	glutCreateWindow("OpenGL Pierwszy Program");
 	glewInit();
 
