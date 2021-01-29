@@ -391,11 +391,8 @@ void renderScene()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.1f, 0.3f, 1.0f);
-
-	drawObjects();
-
 	Skybox::renderSkybox(programSkybox, cameraMatrix, perspectiveMatrix);
-	
+	drawObjects();
 	glutSwapBuffers();
 }
 
@@ -426,10 +423,11 @@ void init()
 	textureNeptune = Core::LoadTexture("textures/neptune.png");
 	textureSun = Core::LoadTexture("textures/sun.png");
 
+	Skybox::initSkybox();
 	createObjects();
 	appLoadingTime = glutGet(GLUT_ELAPSED_TIME)/1000.0f;
 
-	Skybox::initSkybox();
+	
 }
 
 void shutdown()
