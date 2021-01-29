@@ -17,6 +17,7 @@
 #include "Sun.h"
 #include "Ship.h"
 #include "Skybox.h"
+#include "Ufo.h"
 #include <memory>
 
 GLuint programSkybox;
@@ -235,7 +236,8 @@ void createObjects() {
 	}
 
 	std::shared_ptr<Ship>  ship = Ship::create(programColor, &shipModel, sunPos, sunPos2, glm::vec3(0.6f));
-	std::shared_ptr<Ship> ufo = Ship::create(programColor, &ufoModel, sunPos, sunPos2, glm::vec3(0.6f));
+
+	std::shared_ptr<Ufo> ufo = Ufo::create(programTexture, &ufoModel, planetDefaultMatrix, textureVenus, sunPos, sunPos2);
 
 	std::shared_ptr<Sun> sun1 = Sun::create(programSun, &sphereModel, glm::translate(sunPos) * glm::scale(glm::vec3(8 * 14.0f)),sunPos,sunPos2,textureSun);
 	std::shared_ptr<Sun> sun2 = Sun::create(programSun, &sphereModel, glm::translate(sunPos2) * glm::scale(glm::vec3(8 * 14.0f)), sunPos, sunPos2, textureSun);
@@ -292,15 +294,12 @@ void drawObjects() {
 
 	int ctr = 0;
 	for (auto obj : Ship::ship_objects) {
-		if (ctr == 0) {
-			obj->setMatrix(shipModelMatrix);
-		}
-		if (ctr == 1) {
-			obj->setMatrix(glm::translate(predictMove()) * glm::scale(glm::vec3(4.0f)));
-			
-		}
+		obj->setMatrix(shipModelMatrix);
 		obj->draw(obj->getColor(), cameraPos, perspectiveMatrix, cameraMatrix);
-		ctr++;
+	}
+	for (auto obj : Ufo::ufo_objects) {
+		obj->setMatrix(glm::translate(predictMove()) * glm::scale(glm::vec3(4.0f)));
+		obj->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);
 	}
 	for (auto obj : Sun::sun_objects) {
 		obj->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);

@@ -23,6 +23,7 @@
     <ClCompile Include="src\Skybox.cpp" />
     <ClCompile Include="src\Texture.cpp" />
     <ClCompile Include="src\Sun.cpp" />
+    <ClCompile Include="src\Ufo.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Asteroid.h" />
@@ -39,6 +40,7 @@
       <DeploymentContent>true</DeploymentContent>
     </ClInclude>
     <ClInclude Include="src\Sun.h" />
+    <ClInclude Include="src\Ufo.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\shader_color.frag" />
