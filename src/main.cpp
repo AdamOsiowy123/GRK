@@ -26,6 +26,7 @@ GLuint programTexture;
 GLuint programSun;
 GLuint programSight;
 GLuint programBump;
+GLuint programUfo;
 
 Core::Shader_Loader shaderLoader;
 
@@ -65,6 +66,7 @@ GLuint textureSaturn;
 GLuint textureUranus;
 GLuint textureNeptune;
 GLuint textureSun;
+GLuint textureUfo;
 
 glm::vec3 mercuryTranslate = glm::vec3(0.0f);
 glm::vec3 mercury2Translate = glm::vec3(0.0f);
@@ -241,7 +243,7 @@ void createObjects() {
 
 	std::shared_ptr<Ship>  ship = Ship::create(programColor, &shipModel, sunPos, sunPos2, glm::vec3(0.6f));
 
-	std::shared_ptr<Ufo> ufo = Ufo::create(programTexture, &ufoModel, planetDefaultMatrix, textureVenus, sunPos, sunPos2);
+	std::shared_ptr<Ufo> ufo = Ufo::create(programUfo, &ufoModel, planetDefaultMatrix, textureUfo, sunPos, sunPos2);
 
 	std::shared_ptr<Sun> sun1 = Sun::create(programSun, &sphereModel, glm::translate(sunPos) * glm::scale(glm::vec3(8 * 14.0f)),sunPos,sunPos2,textureSun);
 	std::shared_ptr<Sun> sun2 = Sun::create(programSun, &sphereModel, glm::translate(sunPos2) * glm::scale(glm::vec3(8 * 14.0f)), sunPos, sunPos2, textureSun);
@@ -403,17 +405,21 @@ void init()
 {
 	srand(time(0));
 	glEnable(GL_DEPTH_TEST);
+
 	programColor = shaderLoader.CreateProgram("shaders/shader_color.vert", "shaders/shader_color.frag");
 	programTexture = shaderLoader.CreateProgram("shaders/shader_tex.vert", "shaders/shader_tex.frag");
 	programSun = shaderLoader.CreateProgram("shaders/shader_sun.vert", "shaders/shader_sun.frag");
 	programSight = shaderLoader.CreateProgram("shaders/shader_sight.vert", "shaders/shader_sight.frag");
 	programBump = shaderLoader.CreateProgram("shaders/shader_bump.vert", "shaders/shader_bump.frag");
 	programSkybox = shaderLoader.CreateProgram("shaders/shader_skybox.vert", "shaders/shader_skybox.frag");
+	programUfo = shaderLoader.CreateProgram("shaders/shader_ufo.vert", "shaders/shader_ufo.frag");
+
 	sphereModel = obj::loadModelFromFile("models/sphere.obj");
 	shipModel = obj::loadModelFromFile("models/wraith.obj");
 	planeModel = obj::loadModelFromFile("models/plane.obj");
 	saturnModel = obj::loadModelFromFile("models/saturn.obj");
 	ufoModel = obj::loadModelFromFile("models/ufo.obj");
+
 	textureAsteroid = Core::LoadTexture("textures/asteroid.png");
 	textureAsteroid_normals = Core::LoadTexture("textures/asteroid_normals.png");
 	textureJupiter = Core::LoadTexture("textures/jupiter.png");
@@ -425,6 +431,7 @@ void init()
 	textureUranus = Core::LoadTexture("textures/uranus.png");
 	textureNeptune = Core::LoadTexture("textures/neptune.png");
 	textureSun = Core::LoadTexture("textures/sun.png");
+	textureUfo = Core::LoadTexture("textures/ufo.png");
 
 	Skybox::initSkybox();
 	createObjects();
