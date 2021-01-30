@@ -177,7 +177,7 @@ glm::vec3 predictMove() {
 			break;
 		}
 	}
-	while (isCloser || (isSun || isPlanet || isAsteroid)) {
+	while (isCloser || isSun || isPlanet || isAsteroid) {
 		newUfo3 = wspolrzedneUfo[3] + glm::sphericalRand(0.5f);
 		isCloser = glm::length(newUfo3 - (cameraPos + cameraDir * 0.5f)) < glm::length(wspolrzedneUfo[3] - (cameraPos + cameraDir * 0.5f));
 		isSun = isSun = glm::length(newUfo3 - sunPos) < 140.0f || glm::length(newUfo3 - sunPos2) < 140.0f;
@@ -195,7 +195,11 @@ glm::vec3 predictMove() {
 			}
 		}
 	}
-	wspolrzedneUfo[3] = newUfo3;
+	bool isTooFar = glm::length(newUfo3 - (cameraPos + cameraDir * 0.5f)) > 500.0f;
+	if (!isTooFar) {
+		wspolrzedneUfo[3] = newUfo3;
+	}
+	
 	return catmull;
 }
 
