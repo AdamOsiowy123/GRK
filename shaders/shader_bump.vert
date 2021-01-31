@@ -38,6 +38,6 @@ void main()
 	lightDirTS = TBN * lightDir;
 	lightDirTS2 = TBN * lightDir2;
 	viewDirTS = TBN * viewDir;
-	vec3 lightPosOut = lightPos;
-	vec3 lightPosOut2 = lightPos2;
+	lightPosOut = lightPos;
+	lightPosOut2 = lightPos2;
 }
