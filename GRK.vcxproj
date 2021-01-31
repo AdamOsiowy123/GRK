@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-	<ClCompile Include="src\ParticleEffect.cpp" />
+    <ClCompile Include="src\ParticleEffect.cpp" />
     <ClCompile Include="src\Asteroid.cpp" />
     <ClCompile Include="src\Planet.cpp" />
     <ClCompile Include="src\Ship.cpp" />
@@ -22,16 +22,12 @@
     <ClCompile Include="src\Render_Utils.cpp" />
     <ClCompile Include="src\Shader_Loader.cpp" />
     <ClCompile Include="src\Skybox.cpp" />
-	<ClCompile Include="src\SOIL\image_DXT.c" />
-    <ClCompile Include="src\SOIL\image_helper.c" />
-    <ClCompile Include="src\SOIL\SOIL.c" />
-    <ClCompile Include="src\SOIL\stb_image_aug.c" />
     <ClCompile Include="src\Texture.cpp" />
     <ClCompile Include="src\Sun.cpp" />
     <ClCompile Include="src\Ufo.cpp" />
   </ItemGroup>
   <ItemGroup>
-	<ClCompile Include="src\ParticleEffect.h" />
+    <ClCompile Include="src\ParticleEffect.h" />
     <ClInclude Include="src\Asteroid.h" />
     <ClInclude Include="src\Planet.h" />
     <ClInclude Include="src\Ship.h" />
@@ -42,12 +38,6 @@
     <ClInclude Include="src\Shader_Loader.h" />
     <ClInclude Include="src\Skybox.h" />
     <ClInclude Include="src\stb_image.h" />
-	<ClInclude Include="src\SOIL\image_DXT.h" />
-    <ClInclude Include="src\SOIL\image_helper.h" />
-    <ClInclude Include="src\SOIL\SOIL.h" />
-    <ClInclude Include="src\SOIL\stbi_DDS_aug.h" />
-    <ClInclude Include="src\SOIL\stbi_DDS_aug_c.h" />
-    <ClInclude Include="src\SOIL\stb_image_aug.h" />
     <ClInclude Include="src\Texture.h">
       <DeploymentContent>true</DeploymentContent>
     </ClInclude>

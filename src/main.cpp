@@ -18,8 +18,10 @@
 #include "Ship.h"
 #include "Skybox.h"
 #include "Ufo.h"
+#include "ParticleEffect.h"
 #include <memory>
 
+GLuint programParticle;
 GLuint programSkybox;
 GLuint programColor;
 GLuint programTexture;
@@ -67,6 +69,7 @@ GLuint textureUranus;
 GLuint textureNeptune;
 GLuint textureSun;
 GLuint textureUfo;
+std::vector<GLuint> textureParticle;
 
 glm::vec3 mercuryTranslate = glm::vec3(0.0f);
 glm::vec3 mercury2Translate = glm::vec3(0.0f);
@@ -111,6 +114,8 @@ bool freeLook = false;
 
 float appLoadingTime;
 
+ParticleEffect* effect;
+
 void keyboard(unsigned char key, int x, int y)
 {
 	
@@ -149,6 +154,13 @@ void mouseClick(int button, int state, int x, int y) {
 			cameraPos += cameraDir * 50.0f;
 		}
 	}
+	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+		effect = new ParticleEffect(programParticle, 10, 0.015625f, textureParticle, glm::vec3(-170.0f,0.0f,600.0f));
+	}
+}
+
+void loadParticleTextures() {
+	textureParticle = Core::LoadParticleTextures();
 }
 
 glm::vec3 predictMove() {
@@ -163,7 +175,7 @@ glm::vec3 predictMove() {
 	wspolrzedneUfo[0] = wspolrzedneUfo[1];
 	wspolrzedneUfo[1] = wspolrzedneUfo[2];
 	wspolrzedneUfo[2] = wspolrzedneUfo[3];
-	glm::vec3 newUfo3 = wspolrzedneUfo[3] + glm::sphericalRand(0.5f);
+	glm::vec3 newUfo3 = wspolrzedneUfo[3] + glm::sphericalRand(2.0f);
 	bool isCloser = glm::length(newUfo3 - (cameraPos + cameraDir * 0.5f)) < glm::length(wspolrzedneUfo[3] - (cameraPos + cameraDir * 0.5f));
 	bool isSun = glm::length(newUfo3 - sunPos) < 140.0f || glm::length(newUfo3 - sunPos2) < 140.0f;
 	bool isPlanet = glm::length(newUfo3 - mercuryTranslate) < 19.2f || glm::length(newUfo3 - mercury2Translate) < 19.2f || glm::length(newUfo3 - venusTranslate) < 36.3f
@@ -180,7 +192,7 @@ glm::vec3 predictMove() {
 		}
 	}
 	while (isCloser || isSun || isPlanet || isAsteroid) {
-		newUfo3 = wspolrzedneUfo[3] + glm::sphericalRand(0.5f);
+		newUfo3 = wspolrzedneUfo[3] + glm::sphericalRand(2.0f);
 		isCloser = glm::length(newUfo3 - (cameraPos + cameraDir * 0.5f)) < glm::length(wspolrzedneUfo[3] - (cameraPos + cameraDir * 0.5f));
 		isSun = isSun = glm::length(newUfo3 - sunPos) < 140.0f || glm::length(newUfo3 - sunPos2) < 140.0f;
 		isPlanet = glm::length(newUfo3 - mercuryTranslate) < 19.2f || glm::length(newUfo3 - mercury2Translate) < 19.2f || glm::length(newUfo3 - venusTranslate) < 36.3f
@@ -390,6 +402,12 @@ void drawObjects() {
 		counter++;
 	}
 	counter = 0;
+	if (effect) {
+		if (effect->isActive()) {
+			effect->sendProjectionToShader(perspectiveMatrix, cameraMatrix,shipModelMatrix);
+			effect->simulate();
+		}
+	}
 }
 
 void renderScene()
@@ -413,6 +431,7 @@ void init()
 	programBump = shaderLoader.CreateProgram("shaders/shader_bump.vert", "shaders/shader_bump.frag");
 	programSkybox = shaderLoader.CreateProgram("shaders/shader_skybox.vert", "shaders/shader_skybox.frag");
 	programUfo = shaderLoader.CreateProgram("shaders/shader_ufo.vert", "shaders/shader_ufo.frag");
+	programParticle = shaderLoader.CreateProgram("shaders/shader_particle.vert", "shaders/shader_particle.frag");
 
 	sphereModel = obj::loadModelFromFile("models/sphere.obj");
 	shipModel = obj::loadModelFromFile("models/wraith.obj");
@@ -432,6 +451,8 @@ void init()
 	textureNeptune = Core::LoadTexture("textures/neptune.png");
 	textureSun = Core::LoadTexture("textures/sun.png");
 	textureUfo = Core::LoadTexture("textures/ufo.png");
+
+	loadParticleTextures();
 
 	Skybox::initSkybox();
 	createObjects();

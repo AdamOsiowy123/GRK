@@ -6,10 +6,11 @@ out vec3 TexCoords;
 
 uniform mat4 projection;
 uniform vec3 position;
+uniform mat4 shipProjectionMatrix;
 
 void main()
 {
-	float scale = 0.9f;
+	float scale = 500.0f;
     TexCoords = vertex.xyz;
-    gl_Position = projection * vec4((vertex.xyz * scale) + position, 1.0);
+    gl_Position = projection * shipProjectionMatrix * vec4((vertex.xyz * scale) + position, 1.0);
 }

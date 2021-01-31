@@ -88,27 +88,40 @@ void ParticleEffect::deactivate()
 
 void ParticleEffect::sortParticles()
 {
-	std::sort(&particles[0], &particles[amount-1]);
+    if (this->particles.size() > 0) {
+        std::sort(&particles[0], &particles[this->particles.size()-1]);
+    }
 }
 
 void ParticleEffect::deleteDeadParticles()
-{
-    std::vector<Particle> copy;
-    for (auto p : this->particles) {
-        if (p.Life > 0 && p.Age < 1.0f) {
-            copy.push_back(p);
-        }
+{   
+    if (this->particles.size() == 0) {
+        this->deactivate();
     }
-    this->particles = copy;
+    else {
+        std::vector<Particle> copy;
+        for (auto p : this->particles) {
+            if (p.Life > 0 && p.Age < 1.0f) {
+                copy.push_back(p);
+            }
+        }
+        this->particles = copy;
+    }
 }
 
-void ParticleEffect::sendProjectionToShader(glm::mat4 persp, glm::mat4 camera)
+void ParticleEffect::sendProjectionToShader(glm::mat4 persp, glm::mat4 camera, glm::mat4 shipProjectionMatrix)
 {
 	glUseProgram(this->shader);
 	glm::mat4 trans;
 	trans = persp * camera;
 	glUniformMatrix4fv(glGetUniformLocation(this->shader, "projection"), 1, GL_FALSE, (float*)&trans);
-	glUseProgram(0);
+    glUniformMatrix4fv(glGetUniformLocation(this->shader, "shipProjectionMatrix"), 1, GL_FALSE, (float*)&shipProjectionMatrix);
+    glUseProgram(0);
+}
+
+bool ParticleEffect::isActive()
+{
+    return this->active;
 }
 
 GLuint ParticleEffect::selectTexture(float age)

@@ -32,8 +32,8 @@ class ParticleEffect
 public:
     ParticleEffect(GLuint shader, unsigned int amount, float delta, std::vector<GLuint> textures,glm::vec3 position);
     void simulate();
-    void deactivate();
-    void sendProjectionToShader(glm::mat4 persp, glm::mat4 camera);
+    void sendProjectionToShader(glm::mat4 persp, glm::mat4 camera,glm::mat4 shipModelMatrix);
+    bool isActive();
 private:
     GLuint shader;
     std::vector<Particle> particles;
@@ -46,6 +46,7 @@ private:
     void init();
     void draw();
     void update();
+    void deactivate();
     void sortParticles();
     void deleteDeadParticles();
     GLuint selectTexture(float age);
