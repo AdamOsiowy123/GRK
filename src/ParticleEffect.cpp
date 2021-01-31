@@ -75,7 +75,7 @@ void ParticleEffect::update()
     {
         Particle& p = this->particles[i];
         p.Life -= this->delta; 
-        p.Age += (0.015625f * (rand()%3 + 1));
+        p.Age += (this->delta * (rand()%3 + 1));
         //p.Age += 0.015625f;
         p.Position -= p.Velocity * this->delta;
     }
@@ -101,7 +101,7 @@ void ParticleEffect::deleteDeadParticles()
     else {
         std::vector<Particle> copy;
         for (auto p : this->particles) {
-            if (p.Life > 0 && p.Age < 1.0f) {
+            if (p.Life >= 0 && p.Age <= 1.0f) {
                 copy.push_back(p);
             }
         }
@@ -127,11 +127,12 @@ bool ParticleEffect::isActive()
 GLuint ParticleEffect::selectTexture(float age)
 {   
     int index;
-    if (age > 1) {
+    if (age >= 1) {
         index = 63;
     }
     else {
-        index = int(age / 0.015625f) - 1;
+        index = int(age / (this->delta * 10));
     }
+    //std::cout << "index: " << index << std::endl;
     return this->textures[index];
 }
