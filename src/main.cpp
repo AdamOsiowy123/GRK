@@ -175,15 +175,15 @@ glm::vec3 predictMove() {
 	wspolrzedneUfo[0] = wspolrzedneUfo[1];
 	wspolrzedneUfo[1] = wspolrzedneUfo[2];
 	wspolrzedneUfo[2] = wspolrzedneUfo[3];
-	glm::vec3 newUfo3 = wspolrzedneUfo[3] + glm::sphericalRand(2.0f);
+	glm::vec3 newUfo3 = wspolrzedneUfo[3] + glm::sphericalRand(0.7f);
 	bool isCloser = glm::length(newUfo3 - (cameraPos + cameraDir * 0.5f)) < glm::length(wspolrzedneUfo[3] - (cameraPos + cameraDir * 0.5f));
 	bool isSun = glm::length(newUfo3 - sunPos) < 140.0f || glm::length(newUfo3 - sunPos2) < 140.0f;
 	bool isPlanet = glm::length(newUfo3 - mercuryTranslate) < 19.2f || glm::length(newUfo3 - mercury2Translate) < 19.2f || glm::length(newUfo3 - venusTranslate) < 36.3f
-		&& glm::length(newUfo3 - venus2Translate) < 36.3f || glm::length(newUfo3 - earthTranslate) < 38.1f || glm::length(newUfo3 - earth2Translate) < 38.1f
-		&& glm::length(newUfo3 - marsTranslate) < 27.2f || glm::length(newUfo3 - mars2Translate) < 38.1f || glm::length(newUfo3 - jupiterTranslate) < 100.0f
-		&& glm::length(newUfo3 - jupiter2Translate) < 100.0f || glm::length(newUfo3 - saturnTranslate) < 150.0f || glm::length(newUfo3 - saturn2Translate) < 150.0f
-		&& glm::length(newUfo3 - uranusTranslate) < 80.0f || glm::length(newUfo3 - uranus2Translate) < 80.0f || glm::length(newUfo3 - neptuneTranslate) < 78.0f
-		&& glm::length(newUfo3 - neptune2Translate) < 78.0f;
+		|| glm::length(newUfo3 - venus2Translate) < 36.3f || glm::length(newUfo3 - earthTranslate) < 38.1f || glm::length(newUfo3 - earth2Translate) < 38.1f
+		|| glm::length(newUfo3 - marsTranslate) < 27.2f || glm::length(newUfo3 - mars2Translate) < 38.1f || glm::length(newUfo3 - jupiterTranslate) < 100.0f
+		|| glm::length(newUfo3 - jupiter2Translate) < 100.0f || glm::length(newUfo3 - saturnTranslate) < 150.0f || glm::length(newUfo3 - saturn2Translate) < 150.0f
+		|| glm::length(newUfo3 - uranusTranslate) < 80.0f || glm::length(newUfo3 - uranus2Translate) < 80.0f || glm::length(newUfo3 - neptuneTranslate) < 78.0f
+		|| glm::length(newUfo3 - neptune2Translate) < 78.0f;
 	bool isAsteroid = false;
 	for (auto i : wspolrzedne) {
 		if (glm::length(newUfo3 - i) < 2.0f) {
@@ -192,15 +192,15 @@ glm::vec3 predictMove() {
 		}
 	}
 	while (isCloser || isSun || isPlanet || isAsteroid) {
-		newUfo3 = wspolrzedneUfo[3] + glm::sphericalRand(2.0f);
+		newUfo3 = wspolrzedneUfo[3] + glm::sphericalRand(0.7f);
 		isCloser = glm::length(newUfo3 - (cameraPos + cameraDir * 0.5f)) < glm::length(wspolrzedneUfo[3] - (cameraPos + cameraDir * 0.5f));
 		isSun = isSun = glm::length(newUfo3 - sunPos) < 140.0f || glm::length(newUfo3 - sunPos2) < 140.0f;
 		isPlanet = glm::length(newUfo3 - mercuryTranslate) < 19.2f || glm::length(newUfo3 - mercury2Translate) < 19.2f || glm::length(newUfo3 - venusTranslate) < 36.3f
-			&& glm::length(newUfo3 - venus2Translate) < 36.3f || glm::length(newUfo3 - earthTranslate) < 38.1f || glm::length(newUfo3 - earth2Translate) < 38.1f
-			&& glm::length(newUfo3 - marsTranslate) < 27.2f || glm::length(newUfo3 - mars2Translate) < 38.1f || glm::length(newUfo3 - jupiterTranslate) < 100.0f
-			&& glm::length(newUfo3 - jupiter2Translate) < 100.0f || glm::length(newUfo3 - saturnTranslate) < 150.0f || glm::length(newUfo3 - saturn2Translate) < 150.0f
-			&& glm::length(newUfo3 - uranusTranslate) < 80.0f || glm::length(newUfo3 - uranus2Translate) < 80.0f || glm::length(newUfo3 - neptuneTranslate) < 78.0f
-			&& glm::length(newUfo3 - neptune2Translate) < 78.0f;
+			|| glm::length(newUfo3 - venus2Translate) < 36.3f || glm::length(newUfo3 - earthTranslate) < 38.1f || glm::length(newUfo3 - earth2Translate) < 38.1f
+			|| glm::length(newUfo3 - marsTranslate) < 27.2f || glm::length(newUfo3 - mars2Translate) < 38.1f || glm::length(newUfo3 - jupiterTranslate) < 100.0f
+			|| glm::length(newUfo3 - jupiter2Translate) < 100.0f || glm::length(newUfo3 - saturnTranslate) < 150.0f || glm::length(newUfo3 - saturn2Translate) < 150.0f
+			|| glm::length(newUfo3 - uranusTranslate) < 80.0f || glm::length(newUfo3 - uranus2Translate) < 80.0f || glm::length(newUfo3 - neptuneTranslate) < 78.0f
+			|| glm::length(newUfo3 - neptune2Translate) < 78.0f;
 		isAsteroid = false;
 		for (auto i : wspolrzedne) {
 			if (glm::length(newUfo3 - i) < 2.0f) {
