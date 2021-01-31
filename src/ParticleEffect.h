@@ -12,15 +12,18 @@
 #include <array>
 #include <iostream>
 #include <string_view>
-#include <cstdlib>
 #include <ctime>
+#include <cmath>
+#include <stdlib.h>
+#include <time.h>
+#include <random>
+
 
 struct Particle {
     glm::vec3 Position, Velocity;
     float Age;
     float Life;
-
-    Particle(glm::vec3 pos) : Position(glm::vec3(pos.x + (rand() %5 ) / 10.0f, pos.y + (rand() % 5) / 10.0f, pos.z + (rand() % 5) / 10.0f)), Velocity(glm::vec3(0.0f, ((rand() % 5) -10) * 100.0f, ((rand() % 5) -10) * 100.0f)), Age(0.0f), Life(1.0f) { }
+	Particle(glm::vec3 pos, glm::vec3 vel) : Position(glm::vec3(pos.x, pos.y, pos.z)), Velocity(glm::vec3(vel.x, vel.y, vel.z)), Age(0.0f), Life(1.0f) { }
     bool operator<(Particle& that) {
         // old particles drawn first
         return this->Age > that.Age;
@@ -30,7 +33,7 @@ struct Particle {
 class ParticleEffect
 {
 public:
-    ParticleEffect(GLuint shader, unsigned int amount, float delta, std::vector<GLuint> textures,glm::vec3 position);
+    ParticleEffect(GLuint shader, unsigned int amount, float delta, std::vector<GLuint> textures,glm::vec3 position, glm::vec3 velocity);
     void simulate();
     void sendProjectionToShader(glm::mat4 persp, glm::mat4 camera,glm::mat4 shipModelMatrix);
     bool isActive();
@@ -38,7 +41,7 @@ private:
     GLuint shader;
     std::vector<Particle> particles;
     std::vector<GLuint> textures;
-    glm::vec3 position;
+    glm::vec3 position, velocity;
     unsigned int VAO;
     unsigned int amount;
     bool active;

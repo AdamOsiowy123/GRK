@@ -1,6 +1,7 @@
 #include "ParticleEffect.h"
+#include <random>
 
-ParticleEffect::ParticleEffect(GLuint shader, unsigned int amount, float delta, std::vector<GLuint> textures,glm::vec3 position)
+ParticleEffect::ParticleEffect(GLuint shader, unsigned int amount, float delta, std::vector<GLuint> textures,glm::vec3 position, glm::vec3 velocity)
 {
 	this->shader = shader;
 	this->amount = amount;
@@ -8,6 +9,7 @@ ParticleEffect::ParticleEffect(GLuint shader, unsigned int amount, float delta, 
 	this->active = true;
 	this->textures = textures;
     this->position = position;
+	this->velocity = velocity;
 	this->init();
 }
 
@@ -46,7 +48,7 @@ void ParticleEffect::init()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     for (unsigned int i = 0; i < this->amount; ++i)
-        this->particles.push_back(Particle(this->position));
+        this->particles.push_back(Particle(this->position, this->velocity));
 
     srand(time(NULL));
 }
