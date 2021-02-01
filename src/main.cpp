@@ -87,6 +87,8 @@ glm::vec3 uranusTranslate = glm::vec3(0.0f);
 glm::vec3 uranus2Translate = glm::vec3(0.0f);
 glm::vec3 neptuneTranslate = glm::vec3(0.0f);
 glm::vec3 neptune2Translate = glm::vec3(0.0f);
+glm::vec3 moonTranslate = glm::vec3(0.0f);
+glm::vec3 moon2Translate = glm::vec3(0.0f);
 
 
 GLuint textureId;
@@ -179,7 +181,7 @@ glm::vec3 predictMove() {
 	bool isCloser = glm::length(newUfo3 - (cameraPos + cameraDir * 0.5f)) < glm::length(wspolrzedneUfo[3] - (cameraPos + cameraDir * 0.5f));
 	bool isSun = glm::length(newUfo3 - sunPos) < 140.0f || glm::length(newUfo3 - sunPos2) < 140.0f;
 	bool isPlanet = glm::length(newUfo3 - mercuryTranslate) < 19.2f || glm::length(newUfo3 - mercury2Translate) < 19.2f || glm::length(newUfo3 - venusTranslate) < 36.3f
-		|| glm::length(newUfo3 - venus2Translate) < 36.3f || glm::length(newUfo3 - earthTranslate) < 38.1f || glm::length(newUfo3 - earth2Translate) < 38.1f
+		|| glm::length(newUfo3 - venus2Translate) < 36.3f || glm::length(newUfo3 - earthTranslate) < 78.1f || glm::length(newUfo3 - earth2Translate) < 78.1f
 		|| glm::length(newUfo3 - marsTranslate) < 27.2f || glm::length(newUfo3 - mars2Translate) < 38.1f || glm::length(newUfo3 - jupiterTranslate) < 100.0f
 		|| glm::length(newUfo3 - jupiter2Translate) < 100.0f || glm::length(newUfo3 - saturnTranslate) < 150.0f || glm::length(newUfo3 - saturn2Translate) < 150.0f
 		|| glm::length(newUfo3 - uranusTranslate) < 80.0f || glm::length(newUfo3 - uranus2Translate) < 80.0f || glm::length(newUfo3 - neptuneTranslate) < 78.0f
@@ -196,7 +198,7 @@ glm::vec3 predictMove() {
 		isCloser = glm::length(newUfo3 - (cameraPos + cameraDir * 0.5f)) < glm::length(wspolrzedneUfo[3] - (cameraPos + cameraDir * 0.5f));
 		isSun = isSun = glm::length(newUfo3 - sunPos) < 140.0f || glm::length(newUfo3 - sunPos2) < 140.0f;
 		isPlanet = glm::length(newUfo3 - mercuryTranslate) < 19.2f || glm::length(newUfo3 - mercury2Translate) < 19.2f || glm::length(newUfo3 - venusTranslate) < 36.3f
-			|| glm::length(newUfo3 - venus2Translate) < 36.3f || glm::length(newUfo3 - earthTranslate) < 38.1f || glm::length(newUfo3 - earth2Translate) < 38.1f
+			|| glm::length(newUfo3 - venus2Translate) < 36.3f || glm::length(newUfo3 - earthTranslate) < 78.1f || glm::length(newUfo3 - earth2Translate) < 78.1f
 			|| glm::length(newUfo3 - marsTranslate) < 27.2f || glm::length(newUfo3 - mars2Translate) < 38.1f || glm::length(newUfo3 - jupiterTranslate) < 100.0f
 			|| glm::length(newUfo3 - jupiter2Translate) < 100.0f || glm::length(newUfo3 - saturnTranslate) < 150.0f || glm::length(newUfo3 - saturn2Translate) < 150.0f
 			|| glm::length(newUfo3 - uranusTranslate) < 80.0f || glm::length(newUfo3 - uranus2Translate) < 80.0f || glm::length(newUfo3 - neptuneTranslate) < 78.0f
@@ -283,6 +285,10 @@ void createObjects() {
 	std::shared_ptr<Planet> saturn2 = Planet::create(programTexture, &saturnModel, planetDefaultMatrix, textureSaturn, sunPos, sunPos2);
 	std::shared_ptr<Planet> uranus2 = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureUranus, sunPos, sunPos2);
 	std::shared_ptr<Planet> neptune2 = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureNeptune, sunPos, sunPos2);
+	std::shared_ptr<Planet> moon = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureMercury, sunPos, sunPos2);
+	std::shared_ptr<Planet> moon2 = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureMercury, sunPos, sunPos2);
+
+
 
 	std::shared_ptr<Planet> gunSight1 = Planet::create(programSight, &planeModel, sightDefaultMatrix, sunPos, sunPos2);
 	std::shared_ptr<Planet> gunSight2 = Planet::create(programSight, &planeModel, sightDefaultMatrix, sunPos, sunPos2);
@@ -390,12 +396,20 @@ void drawObjects() {
 			neptune2Translate = glm::vec3(sunPos2.x + -1700.0f * sinf(timeF / 22), sunPos2.y, sunPos2.z + -1700.0f * cosf(timeF / 22));
 			obj->setMatrix(glm::translate(neptune2Translate) * planetRotation * glm::scale(glm::vec3(39.0f)));
 		}
+		if (counter == 16) {
+			moonTranslate = glm::vec3((sunPos.x + 350.0f * sinf(timeF / 12)) + 40 * sinf(timeF), sunPos.y, (sunPos.z + 350.0f * cosf(timeF / 12)) + 40 * cosf(timeF));
+			obj->setMatrix(glm::translate(moonTranslate)* glm::scale(glm::vec3(0.25f)) * planetRotation* glm::scale(glm::vec3(15 * 1.27f)));
+		}
+		if (counter == 17) {
+			moon2Translate = glm::vec3((sunPos2.x + 350.0f * sinf(timeF / 12)) + 40 * sinf(timeF), sunPos2.y, (sunPos2.z + 350.0f * cosf(timeF / 12)) + 40 * cosf(timeF));
+			obj->setMatrix(glm::translate(moon2Translate) * glm::scale(glm::vec3(0.25f)) * planetRotation * glm::scale(glm::vec3(15 * 1.27f)));
+		}
 		obj->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);
-		if (counter == 16 && mouseKeyDown) {
+		if (counter == 18 && mouseKeyDown) {
 			obj->setMatrix(glm::translate(glm::vec3(cameraPos.x + (cameraDir.x * 0.5f), cameraPos.y + (cameraDir.y * 0.5f), cameraPos.z + (cameraDir.z * 0.5f))) * glm::mat4_cast(glm::inverse(rotation)) * glm::rotate(shipAngle, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::scale(glm::vec3(0.015f, 0.001f, 0.015f)));
 			obj->draw(glm::vec3(1.0f), cameraPos, perspectiveMatrix, cameraMatrix);
 		}
-		if (counter == 17 && mouseKeyDown) {
+		if (counter == 19 && mouseKeyDown) {
 			obj->setMatrix(glm::translate(glm::vec3(cameraPos.x + (cameraDir.x * 0.5f), cameraPos.y + (cameraDir.y * 0.5f), cameraPos.z + (cameraDir.z * 0.5f))) * glm::mat4_cast(glm::inverse(rotation)) * glm::rotate(shipAngle, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::scale(glm::vec3(0.001f, 0.015f, 0.001f)));
 			obj->draw(glm::vec3(1.0f), cameraPos, perspectiveMatrix, cameraMatrix);
 		}
