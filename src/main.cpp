@@ -56,6 +56,7 @@ glm::mat4 sightDefaultMatrix = glm::translate(glm::vec3(100000.0f));
 
 glm::quat rotation = glm::quat(1, 0, 0, 0);
 float shipAngle = glm::radians(180.0f);
+float frustumScale = 1.0f;
 
 GLuint textureAsteroid;
 GLuint textureAsteroid_normals;
@@ -297,7 +298,7 @@ void createObjects() {
 void drawObjects() {
 	float timeF = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
 	cameraMatrix = createCameraMatrix();
-	perspectiveMatrix = Core::createPerspectiveMatrix();
+	perspectiveMatrix = Core::createPerspectiveMatrix(frustumScale);
 
 	glm::mat4 shipModelMatrix;
 	glm::mat4 shipInitialTransformation;
@@ -475,6 +476,13 @@ void init()
 	
 }
 
+void onReshape(int width, int height)
+{
+	frustumScale = (float)width / height;
+
+	glViewport(0, 0, width, height);
+}
+
 void shutdown()
 {
 	shaderLoader.DeleteProgram(programColor);
@@ -503,6 +511,7 @@ int main(int argc, char ** argv)
 	glutMouseFunc(mouseClick);
 	glutDisplayFunc(renderScene);
 	glutIdleFunc(idle);
+	glutReshapeFunc(onReshape);
 
 	glutMainLoop();
 
