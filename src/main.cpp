@@ -37,6 +37,8 @@ PxRigidDynamic* shipBody = nullptr;
 PxMaterial* shipMaterial = nullptr;
 float F_front = 0.0f;
 float F_side = 0.0f;
+float F_qe = 0.0f;
+float F_zc = 0.0f;
 /// PHYSICS SHIP
 
 GLuint programParticle;
@@ -136,6 +138,8 @@ float appLoadingTime;
 
 ParticleEffect* effect;
 
+float swidth = 650.0f, sheight = 650.0f;
+
 
 void initPhysicsScene()
 {
@@ -186,6 +190,32 @@ void updateTransforms()
 	}
 }
 
+void text(int x, int y, std::string text, int rozmiar)
+{
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+	glOrtho(0, swidth, 0, sheight, -1.0f, 1.0f);
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+	glPushAttrib(GL_DEPTH_TEST);
+	glDisable(GL_DEPTH_TEST);
+	glRasterPos2i(x, y);
+	void* rozm = GLUT_BITMAP_HELVETICA_18;
+	if (rozmiar == 18) rozm = GLUT_BITMAP_HELVETICA_18;
+	if (rozmiar == 12) rozm = GLUT_BITMAP_HELVETICA_12;
+	for (int i = 0; i < text.size(); i++)
+	{
+		glutBitmapCharacter(rozm, text[i]);
+	}
+	glPopAttrib();
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
+	glPopMatrix();
+}
+
 void keyboard(unsigned char key, int x, int y)
 {
 	
@@ -194,12 +224,14 @@ void keyboard(unsigned char key, int x, int y)
 	float moveSpeed = 10.0f;
 	switch(key)
 	{
-	case 'z': roznicaZ = -20.0f; break;
-	case 'x': roznicaZ = 20.0f; break;
 	case 'w': F_front -= 10; break;
 	case 's': F_front += 10; break;
 	case 'd': F_side += 5; break;
 	case 'a': F_side -= 5; break;
+	case 'q': F_qe -= 5; break;
+	case 'e': F_qe += 5; break;
+	case 'z': F_zc += 5; break;
+	case 'c': F_zc -= 5; break;
 	case 'm': shipAngle += glm::radians(2.0f); break;
 	case 'f': freeLook = !freeLook; lastRotation = rotation; break;
 	}
@@ -520,11 +552,12 @@ void drawObjects() {
 		}
 		obj->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);
 		if (counter == 18 && mouseKeyDown) {
-			obj->setMatrix(glm::translate(glm::vec3(cameraPos.x + (cameraDir.x * 0.5f), cameraPos.y + (cameraDir.y * 0.5f), cameraPos.z + (cameraDir.z * 0.5f))) * glm::mat4_cast(glm::inverse(rotation)) * glm::rotate(shipAngle, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::scale(glm::vec3(0.015f, 0.001f, 0.015f)));
+			obj->setMatrix(glm::translate(glm::vec3(cameraPos.x, cameraPos.y, cameraPos.z + 3)) * glm::scale(glm::vec3(0.015f, 0.001f, 0.015f)));
 			obj->draw(glm::vec3(1.0f), cameraPos, perspectiveMatrix, cameraMatrix);
+			text(swidth/2, sheight/2, "+", 20);
 		}
 		if (counter == 19 && mouseKeyDown) {
-			obj->setMatrix(glm::translate(glm::vec3(cameraPos.x + (cameraDir.x * 0.5f), cameraPos.y + (cameraDir.y * 0.5f), cameraPos.z + (cameraDir.z * 0.5f))) * glm::mat4_cast(glm::inverse(rotation)) * glm::rotate(shipAngle, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::scale(glm::vec3(0.001f, 0.015f, 0.001f)));
+			obj->setMatrix(ship->getMatrix() * glm::scale(glm::vec3(0.001f, 0.015f, 0.001f)));
 			obj->draw(glm::vec3(1.0f), cameraPos, perspectiveMatrix, cameraMatrix);
 		}
 		counter++;
@@ -560,6 +593,8 @@ void renderScene()
 
 	PxRigidBodyExt::addLocalForceAtLocalPos(*shipBody, PxVec3(0, 0, F_side), PxVec3(2, 0, 0));
 	PxRigidBodyExt::addLocalForceAtLocalPos(*shipBody, PxVec3(0, 0, F_front), PxVec3(0, 0, 0));
+	PxRigidBodyExt::addLocalForceAtLocalPos(*shipBody, PxVec3(0, F_qe, 0), PxVec3(0, 0, 0));
+	PxRigidBodyExt::addLocalForceAtLocalPos(*shipBody, PxVec3(0, F_zc, 0), PxVec3(2, 0, 0));
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.1f, 0.3f, 1.0f);
@@ -620,7 +655,8 @@ void init()
 void onReshape(int width, int height)
 {
 	frustumScale = (float)width / height;
-
+	swidth = width;
+	sheight = height;
 	glViewport(0, 0, width, height);
 }
 
