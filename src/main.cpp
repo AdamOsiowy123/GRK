@@ -86,6 +86,10 @@ Planet* neptune;
 PxRigidDynamic* neptuneBody;
 Planet* neptune2;
 PxRigidDynamic* neptuneBody2;
+Planet* moon;
+PxRigidDynamic* moonBody;
+Planet* moon2;
+PxRigidDynamic* moonBody2;
 PxMaterial* planetMaterial = nullptr;
 /// PHYSICS PLANETs
 
@@ -307,7 +311,7 @@ void initPhysicsScene()
 	scene.scene->addActor(*jupiterBody2);
 
 	saturnBody = scene.physics->createRigidDynamic(PxTransform(saturnTranslate.x, saturnTranslate.y, saturnTranslate.z));
-	PxShape* saturnShape = scene.physics->createShape(PxSphereGeometry(100.0), *planetMaterial);
+	PxShape* saturnShape = scene.physics->createShape(PxSphereGeometry(85.0), *planetMaterial);
 	saturnBody->attachShape(*saturnShape);
 	saturnShape->release();
 	saturnBody->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
@@ -315,7 +319,7 @@ void initPhysicsScene()
 	scene.scene->addActor(*saturnBody);
 
 	saturnBody2 = scene.physics->createRigidDynamic(PxTransform(saturn2Translate.x, saturn2Translate.y, saturn2Translate.z));
-	PxShape* saturn2Shape = scene.physics->createShape(PxSphereGeometry(100.0), *planetMaterial);
+	PxShape* saturn2Shape = scene.physics->createShape(PxSphereGeometry(85.0), *planetMaterial);
 	saturnBody2->attachShape(*saturn2Shape);
 	saturn2Shape->release();
 	saturnBody2->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
@@ -353,6 +357,22 @@ void initPhysicsScene()
 	neptuneBody2->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
 	neptuneBody2->userData = neptune2;
 	scene.scene->addActor(*neptuneBody2);
+
+	moonBody = scene.physics->createRigidDynamic(PxTransform(moonTranslate.x, moonTranslate.y, moonTranslate.z));
+	PxShape* moonShape = scene.physics->createShape(PxSphereGeometry(4.75), *planetMaterial);
+	moonBody->attachShape(*moonShape);
+	moonShape->release();
+	moonBody->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
+	moonBody->userData = moon;
+	scene.scene->addActor(*moonBody);
+
+	moonBody2 = scene.physics->createRigidDynamic(PxTransform(moon2Translate.x, moon2Translate.y, moon2Translate.z));
+	PxShape* moon2Shape = scene.physics->createShape(PxSphereGeometry(4.75), *planetMaterial);
+	moonBody2->attachShape(*moon2Shape);
+	moon2Shape->release();
+	moonBody2->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
+	moonBody2->userData = moon2;
+	scene.scene->addActor(*moonBody2);
 }
 
 void updateTransforms()
@@ -625,8 +645,8 @@ void createObjects() {
 	uranus2 = new Planet(programTexture, &sphereModel, glm::translate(uranus2Translate), textureUranus, sunPos, sunPos2);
 	neptune2 = new Planet(programTexture, &sphereModel, glm::translate(neptune2Translate), textureNeptune, sunPos, sunPos2);
 
-	//moon = new Planet(programTexture, &sphereModel, planetDefaultMatrix, textureMercury, sunPos, sunPos2);
-	//moon2 = new Planet(programTexture, &sphereModel, planetDefaultMatrix, textureMercury, sunPos, sunPos2);
+	moon = new Planet(programTexture, &sphereModel, glm::translate(moonTranslate), textureMercury, sunPos, sunPos2);
+	moon2 = new Planet(programTexture, &sphereModel, glm::translate(moon2Translate), textureMercury, sunPos, sunPos2);
 
 	std::shared_ptr<Planet> gunSight1 = Planet::create(programSight, &planeModel, sightDefaultMatrix, sunPos, sunPos2);
 	std::shared_ptr<Planet> gunSight2 = Planet::create(programSight, &planeModel, sightDefaultMatrix, sunPos, sunPos2);
@@ -634,22 +654,6 @@ void createObjects() {
 
 void drawObjects() {
 	float timeF = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
-
-	/*glm::mat4 shipModelMatrix;
-	glm::mat4 shipInitialTransformation;
-	if (!mouseKeyDown) {
-		shipInitialTransformation = glm::translate(glm::vec3(0, -0.25f, 0)) * glm::rotate(shipAngle, glm::vec3(0, 1, 0)) * glm::scale(glm::vec3(0.0008f));
-	}
-	else {
-		shipInitialTransformation = glm::translate(glm::vec3(0, -0.15f, 0.3f)) * glm::rotate(shipAngle, glm::vec3(0, 1, 0)) * glm::scale(glm::vec3(0.0008f));
-	}
-	if (freeLook) {
-		shipModelMatrix = glm::translate(cameraPos + cameraDir * 0.5f) * glm::mat4_cast(glm::inverse(lastRotation)) * shipInitialTransformation;
-	}
-	else {
-		
-		shipModelMatrix = glm::translate(cameraPos + cameraDir * 0.5f) * glm::mat4_cast(glm::inverse(rotation)) * shipInitialTransformation;
-	}*/
 
 	// ship
 	//ship.setMatrix(shipModelMatrix);
@@ -786,32 +790,35 @@ void drawObjects() {
 	neptuneBody2->setKinematicTarget(PxTransform(neptune2->getMatrix()[3][0], neptune2->getMatrix()[3][1], neptune2->getMatrix()[3][2]));
 	neptune2->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);
 	//
-		//KSIEZYCE !!!
-		/*if (counter == 16) {
-			moonTranslate = glm::vec3((sunPos.x + 350.0f * sinf(timeF / 12)) + 40 * sinf(timeF), sunPos.y, (sunPos.z + 350.0f * cosf(timeF / 12)) + 40 * cosf(timeF));
-			obj->setMatrix(glm::translate(moonTranslate)* glm::scale(glm::vec3(0.25f)) * planetRotation* glm::scale(glm::vec3(15 * 1.27f)));
-		}
-		if (counter == 17) {
-			moon2Translate = glm::vec3((sunPos2.x + 350.0f * sinf(timeF / 12)) + 40 * sinf(timeF), sunPos2.y, (sunPos2.z + 350.0f * cosf(timeF / 12)) + 40 * cosf(timeF));
-			obj->setMatrix(glm::translate(moon2Translate) * glm::scale(glm::vec3(0.25f)) * planetRotation * glm::scale(glm::vec3(15 * 1.27f)));
-		}*/
 
-		//CELOWNIK !!!
-		/*if (counter == 18 && mouseKeyDown) {
-			obj->setMatrix(glm::translate(glm::vec3(cameraPos.x, cameraPos.y, cameraPos.z + 3)) * glm::scale(glm::vec3(0.015f, 0.001f, 0.015f)));
-			obj->draw(glm::vec3(1.0f), cameraPos, perspectiveMatrix, cameraMatrix);
-			text(swidth/2, sheight/2, "+", 20);
-		}
-		if (counter == 19 && mouseKeyDown) {
-			obj->setMatrix(ship->getMatrix() * glm::scale(glm::vec3(0.001f, 0.015f, 0.001f)));
-			obj->draw(glm::vec3(1.0f), cameraPos, perspectiveMatrix, cameraMatrix);
-		}*/
+	//moon
+	moonTranslate = glm::vec3((sunPos.x + 350.0f * sinf(timeF / 12)) + 40 * sinf(timeF), sunPos.y, (sunPos.z + 350.0f * cosf(timeF / 12)) + 40 * cosf(timeF));
+	moon->setMatrix(glm::translate(moonTranslate)* glm::scale(glm::vec3(0.25f))* planetRotation* glm::scale(glm::vec3(15 * 1.27f)));
+	moonBody->setKinematicTarget(PxTransform(moon->getMatrix()[3][0], moon->getMatrix()[3][1], moon->getMatrix()[3][2]));
+	moon->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);
+	//
+
+	//moon2
+	moon2Translate = glm::vec3((sunPos2.x + 350.0f * sinf(timeF / 12)) + 40 * sinf(timeF), sunPos2.y, (sunPos2.z + 350.0f * cosf(timeF / 12)) + 40 * cosf(timeF));
+	moon2->setMatrix(glm::translate(moon2Translate)* glm::scale(glm::vec3(0.25f))* planetRotation* glm::scale(glm::vec3(15 * 1.27f)));
+	moonBody2->setKinematicTarget(PxTransform(moon2->getMatrix()[3][0], moon2->getMatrix()[3][1], moon2->getMatrix()[3][2]));
+	moon2->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);
+	//
+
+	//gunsight
+	if (mouseKeyDown) {
+		text(swidth/2 - 5, sheight/2 - 50, "+", 20);
+	}
+	//
+
+	//particle effect
 	if (effect) {
 		if (effect->isActive()) {
 			effect->sendProjectionToShader(perspectiveMatrix, cameraMatrix, ship->getMatrix());
 			effect->simulate();
 		}
 	}
+	//
 }
 
 void renderScene()
