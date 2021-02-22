@@ -45,6 +45,50 @@ PxRigidDynamic* asteroidsBody[280];
 PxMaterial* asteroidMaterial = nullptr;
 /// PHYSICS ASTEROIDs
 
+/// PHYSICS SUN
+Sun* sun1;
+Sun* sun2;
+PxRigidDynamic* sun1Body = nullptr;
+PxRigidDynamic* sun2Body = nullptr;
+PxMaterial* sunMaterial = nullptr;
+/// PHYSICS SUN
+
+/// PHYSICS PLANETs
+Planet* mercury;
+PxRigidDynamic* mercuryBody;
+Planet* mercury2;
+PxRigidDynamic* mercuryBody2;
+Planet* venus;
+/*PxRigidDynamic* body;
+Planet* venus2;
+PxRigidDynamic* body;
+Planet* earth;
+PxRigidDynamic* body;
+Planet* earth2;
+PxRigidDynamic* body;
+Planet* mars;
+PxRigidDynamic* body;
+Planet* mars2;
+PxRigidDynamic* body;
+Planet* jupiter;
+PxRigidDynamic* body;
+Planet* jupiter2;
+PxRigidDynamic* body;
+Planet* saturn;
+PxRigidDynamic* body;
+Planet* saturn2;
+PxRigidDynamic* body;
+Planet* uranus;
+PxRigidDynamic* body;
+Planet* uranus2;
+PxRigidDynamic* body;
+Planet* neptune;
+PxRigidDynamic* body;
+Planet* neptune2;
+PxRigidDynamic* body;*/
+PxMaterial* planetMaterial = nullptr;
+/// PHYSICS PLANETs
+
 GLuint programParticle;
 GLuint programSkybox;
 GLuint programColor;
@@ -146,9 +190,9 @@ float swidth = 650.0f, sheight = 650.0f;
 
 void initPhysicsScene()
 {
-	shipBody = scene.physics->createRigidDynamic(PxTransform(0,0,0));
+	shipBody = scene.physics->createRigidDynamic(PxTransform(300,2,300));
 	shipMaterial = scene.physics->createMaterial(1, 1, 0.6);
-	PxShape* shipShape = scene.physics->createShape(PxBoxGeometry(1, 1, 1), *shipMaterial);
+	PxShape* shipShape = scene.physics->createShape(PxBoxGeometry(0.5, 0.5, 0.5), *shipMaterial);
 	shipBody->attachShape(*shipShape);
 	shipShape->release();
 	shipBody->userData = ship;
@@ -164,6 +208,32 @@ void initPhysicsScene()
 		asteroidsBody[i]->userData = asteroids[i];
 		scene.scene->addActor(*asteroidsBody[i]);
 	}
+
+	sun1Body = scene.physics->createRigidDynamic(PxTransform(sunPos.x, sunPos.y, sunPos.z));
+	sunMaterial = scene.physics->createMaterial(1, 1, 0.6);
+	PxShape* sun1Shape = scene.physics->createShape(PxSphereGeometry(117), *sunMaterial);
+	sun1Body->attachShape(*sun1Shape);
+	sun1Shape->release();
+	sun1Body->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
+	sun1Body->userData = sun1;
+	scene.scene->addActor(*sun1Body);
+	sun2Body = scene.physics->createRigidDynamic(PxTransform(sunPos2.x, sunPos2.y, sunPos2.z));
+	PxShape* sun2Shape = scene.physics->createShape(PxSphereGeometry(117), *sunMaterial);
+	sun2Body->attachShape(*sun2Shape);
+	sun2Shape->release();
+	sun2Body->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
+	sun2Body->userData = sun2;
+	scene.scene->addActor(*sun2Body);
+
+	mercuryBody = scene.physics->createRigidDynamic(PxTransform(mercuryTranslate.x, mercuryTranslate.y, mercuryTranslate.z));
+	planetMaterial = scene.physics->createMaterial(1, 1, 0.6);
+	PxShape* mercuryShape = scene.physics->createShape(PxSphereGeometry(9.6), *planetMaterial);
+	mercuryBody->attachShape(*mercuryShape);
+	mercuryShape->release();
+	mercuryBody->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
+	mercuryBody->userData = mercury;
+	scene.scene->addActor(*mercuryBody);
+
 }
 
 void updateTransforms()
@@ -185,7 +255,7 @@ void updateTransforms()
 
 			// get world matrix of the object (actor)
 			PxMat44 transform = actor->getGlobalPose();
-			std::cout << glm::to_string(glm::vec3(actor->getGlobalPose().p.x, actor->getGlobalPose().p.y, actor->getGlobalPose().p.z)) << std::endl;
+			//std::cout << glm::to_string(glm::vec3(actor->getGlobalPose().p.x, actor->getGlobalPose().p.y, actor->getGlobalPose().p.z)) << std::endl;
 			auto& c0 = transform.column0;
 			auto& c1 = transform.column1;
 			auto& c2 = transform.column2;
@@ -407,18 +477,18 @@ void createObjects() {
 	std::shared_ptr<Ufo> ufo = Ufo::create(programUfo, &ufoModel, planetDefaultMatrix, textureUfo, sunPos, sunPos2);
 	//renderables.emplace_back(ufo);
 
-	std::shared_ptr<Sun> sun1 = Sun::create(programSun, &sphereModel, glm::translate(sunPos) * glm::scale(glm::vec3(8 * 14.0f)),sunPos,sunPos2,textureSun);
-	//renderables.emplace_back(sun1);
-	std::shared_ptr<Sun> sun2 = Sun::create(programSun, &sphereModel, glm::translate(sunPos2) * glm::scale(glm::vec3(8 * 14.0f)), sunPos, sunPos2, textureSun);
-	//renderables.emplace_back(sun2);
+	sun1 = new Sun(programSun, &sphereModel, glm::translate(sunPos) * glm::scale(glm::vec3(8 * 14.0f)),sunPos,sunPos2,textureSun);
+	sun2 = new Sun(programSun, &sphereModel, glm::translate(sunPos2) * glm::scale(glm::vec3(8 * 14.0f)), sunPos, sunPos2, textureSun);
 
 	for (int i = 0; i < 280; i++) {
-		std::shared_ptr<Asteroid> asteroid = Asteroid::create(programBump, &sphereModel, glm::translate(wspolrzedne[i]), textureAsteroid, sunPos, sunPos2);
-		asteroid->setNormal(textureAsteroid_normals);
+		//std::shared_ptr<Asteroid> asteroid = Asteroid::create(programBump, &sphereModel, glm::translate(wspolrzedne[i]), textureAsteroid, sunPos, sunPos2);
+		//asteroid->setNormal(textureAsteroid_normals);
+		asteroids[i] = new Asteroid(programBump, &sphereModel, glm::translate(wspolrzedne[i]), textureAsteroid, sunPos, sunPos2);
+		asteroids[i]->setNormal(textureAsteroid_normals);
 		//renderables.emplace_back(asteroid);
 	}
 
-	std::shared_ptr<Planet> mercury = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureMercury, sunPos, sunPos2);
+	mercury = new Planet(programTexture, &sphereModel, glm::translate(mercuryTranslate), textureMercury, sunPos, sunPos2);
 	//renderables.emplace_back(mercury);
 	std::shared_ptr<Planet> venus = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureVenus, sunPos, sunPos2);
 	//renderables.emplace_back(venus);
@@ -490,14 +560,25 @@ void drawObjects() {
 		obj->setMatrix(glm::translate(predictMove()) * glm::scale(glm::vec3(4.0f)));
 		obj->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);
 	}
-	for (auto obj : Sun::sun_objects) {
+	
+	sun1->setMatrix(sun1->getMatrix() * glm::scale(glm::vec3(8 * 14.0f)));
+	sun1->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);
+	sun2->setMatrix(sun2->getMatrix() * glm::scale(glm::vec3(8 * 14.0f)));
+	sun2->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);
+	
+	for (auto obj : asteroids) {
 		obj->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);
 	}
-	for (auto obj : Asteroid::asteroid_objects) {
-		obj->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);
-	}
+
+	//mercury
 	glm::mat4 planetRotation = glm::rotate(3.14f / 2.f * timeF / 2, glm::vec3(0.0f, 1.0f, 0.0f));
-	for (auto obj : Planet::planet_objects) {
+	mercuryTranslate = glm::vec3(sunPos.x + 170.0f * sinf(timeF / 8), sunPos.y, sunPos.z + 170.0f * cosf(timeF / 8));
+	mercury->setMatrix(glm::translate(mercuryTranslate) * planetRotation * glm::scale(glm::vec3(20 * 0.48f)));
+	mercuryBody->setKinematicTarget(PxTransform(mercury->getMatrix()[3][0], mercury->getMatrix()[3][1], mercury->getMatrix()[3][2]));
+	mercury->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);
+	//
+
+	/*for (auto obj : Planet::planet_objects) {
 		if (counter == 0) {
 			mercuryTranslate = glm::vec3(sunPos.x + 170.0f * sinf(timeF / 8), sunPos.y, sunPos.z + 170.0f * cosf(timeF / 8));
 			obj->setMatrix(glm::translate(mercuryTranslate) * planetRotation * glm::scale(glm::vec3(20 * 0.48f)));
@@ -581,7 +662,7 @@ void drawObjects() {
 			obj->draw(glm::vec3(1.0f), cameraPos, perspectiveMatrix, cameraMatrix);
 		}
 		counter++;
-	}
+	}*/
 	counter = 0;
 	if (effect) {
 		if (effect->isActive()) {
