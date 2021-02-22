@@ -59,33 +59,33 @@ PxRigidDynamic* mercuryBody;
 Planet* mercury2;
 PxRigidDynamic* mercuryBody2;
 Planet* venus;
-/*PxRigidDynamic* body;
+PxRigidDynamic* venusBody;
 Planet* venus2;
-PxRigidDynamic* body;
+PxRigidDynamic* venusBody2;
 Planet* earth;
-PxRigidDynamic* body;
+PxRigidDynamic* earthBody;
 Planet* earth2;
-PxRigidDynamic* body;
+PxRigidDynamic* earthBody2;
 Planet* mars;
-PxRigidDynamic* body;
+PxRigidDynamic* marsBody;
 Planet* mars2;
-PxRigidDynamic* body;
+PxRigidDynamic* marsBody2;
 Planet* jupiter;
-PxRigidDynamic* body;
+PxRigidDynamic* jupiterBody;
 Planet* jupiter2;
-PxRigidDynamic* body;
+PxRigidDynamic* jupiterBody2;
 Planet* saturn;
-PxRigidDynamic* body;
+PxRigidDynamic* saturnBody;
 Planet* saturn2;
-PxRigidDynamic* body;
+PxRigidDynamic* saturnBody2;
 Planet* uranus;
-PxRigidDynamic* body;
+PxRigidDynamic* uranusBody;
 Planet* uranus2;
-PxRigidDynamic* body;
+PxRigidDynamic* uranusBody2;
 Planet* neptune;
-PxRigidDynamic* body;
+PxRigidDynamic* neptuneBody;
 Planet* neptune2;
-PxRigidDynamic* body;*/
+PxRigidDynamic* neptuneBody2;
 PxMaterial* planetMaterial = nullptr;
 /// PHYSICS PLANETs
 
@@ -234,6 +234,125 @@ void initPhysicsScene()
 	mercuryBody->userData = mercury;
 	scene.scene->addActor(*mercuryBody);
 
+	mercuryBody2 = scene.physics->createRigidDynamic(PxTransform(mercury2Translate.x, mercury2Translate.y, mercury2Translate.z));
+	PxShape* mercury2Shape = scene.physics->createShape(PxSphereGeometry(9.6), *planetMaterial);
+	mercuryBody2->attachShape(*mercury2Shape);
+	mercury2Shape->release();
+	mercuryBody2->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
+	mercuryBody2->userData = mercury2;
+	scene.scene->addActor(*mercuryBody2);
+
+	venusBody = scene.physics->createRigidDynamic(PxTransform(venusTranslate.x, venusTranslate.y, venusTranslate.z));
+	PxShape* venusShape = scene.physics->createShape(PxSphereGeometry(18.15), *planetMaterial);
+	venusBody->attachShape(*venusShape);
+	venusShape->release();
+	venusBody->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
+	venusBody->userData = venus;
+	scene.scene->addActor(*venusBody);
+
+	venusBody2 = scene.physics->createRigidDynamic(PxTransform(venus2Translate.x, venus2Translate.y, venus2Translate.z));
+	PxShape* venus2Shape = scene.physics->createShape(PxSphereGeometry(18.15), *planetMaterial);
+	venusBody2->attachShape(*venus2Shape);
+	venus2Shape->release();
+	venusBody2->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
+	venusBody2->userData = venus2;
+	scene.scene->addActor(*venusBody2);
+
+	earthBody = scene.physics->createRigidDynamic(PxTransform(earthTranslate.x, earthTranslate.y, earthTranslate.z));
+	PxShape* earthShape = scene.physics->createShape(PxSphereGeometry(19.05), *planetMaterial);
+	earthBody->attachShape(*earthShape);
+	earthShape->release();
+	earthBody->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
+	earthBody->userData = earth;
+	scene.scene->addActor(*earthBody);
+
+	earthBody2 = scene.physics->createRigidDynamic(PxTransform(earth2Translate.x, earth2Translate.y, earth2Translate.z));
+	PxShape* earth2Shape = scene.physics->createShape(PxSphereGeometry(19.05), *planetMaterial);
+	earthBody2->attachShape(*earth2Shape);
+	earth2Shape->release();
+	earthBody2->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
+	earthBody2->userData = earth2;
+	scene.scene->addActor(*earthBody2);
+
+	marsBody = scene.physics->createRigidDynamic(PxTransform(marsTranslate.x, marsTranslate.y, marsTranslate.z));
+	PxShape* marsShape = scene.physics->createShape(PxSphereGeometry(13.6), *planetMaterial);
+	marsBody->attachShape(*marsShape);
+	marsShape->release();
+	marsBody->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
+	marsBody->userData = mars;
+	scene.scene->addActor(*marsBody);
+
+	marsBody2 = scene.physics->createRigidDynamic(PxTransform(mars2Translate.x, mars2Translate.y, mars2Translate.z));
+	PxShape* mars2Shape = scene.physics->createShape(PxSphereGeometry(13.6), *planetMaterial);
+	marsBody2->attachShape(*mars2Shape);
+	mars2Shape->release();
+	marsBody2->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
+	marsBody2->userData = mars2;
+	scene.scene->addActor(*marsBody2);
+
+	jupiterBody = scene.physics->createRigidDynamic(PxTransform(jupiterTranslate.x, jupiterTranslate.y, jupiterTranslate.z));
+	PxShape* jupiterShape = scene.physics->createShape(PxSphereGeometry(49.7), *planetMaterial);
+	jupiterBody->attachShape(*jupiterShape);
+	jupiterShape->release();
+	jupiterBody->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
+	jupiterBody->userData = jupiter;
+	scene.scene->addActor(*jupiterBody);
+
+	jupiterBody2 = scene.physics->createRigidDynamic(PxTransform(jupiter2Translate.x, jupiter2Translate.y, jupiter2Translate.z));
+	PxShape* jupiter2Shape = scene.physics->createShape(PxSphereGeometry(49.7), *planetMaterial);
+	jupiterBody2->attachShape(*jupiter2Shape);
+	jupiter2Shape->release();
+	jupiterBody2->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
+	jupiterBody2->userData = jupiter2;
+	scene.scene->addActor(*jupiterBody2);
+
+	saturnBody = scene.physics->createRigidDynamic(PxTransform(saturnTranslate.x, saturnTranslate.y, saturnTranslate.z));
+	PxShape* saturnShape = scene.physics->createShape(PxSphereGeometry(100.0), *planetMaterial);
+	saturnBody->attachShape(*saturnShape);
+	saturnShape->release();
+	saturnBody->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
+	saturnBody->userData = saturn;
+	scene.scene->addActor(*saturnBody);
+
+	saturnBody2 = scene.physics->createRigidDynamic(PxTransform(saturn2Translate.x, saturn2Translate.y, saturn2Translate.z));
+	PxShape* saturn2Shape = scene.physics->createShape(PxSphereGeometry(100.0), *planetMaterial);
+	saturnBody2->attachShape(*saturn2Shape);
+	saturn2Shape->release();
+	saturnBody2->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
+	saturnBody2->userData = saturn2;
+	scene.scene->addActor(*saturnBody2);
+
+	uranusBody = scene.physics->createRigidDynamic(PxTransform(uranusTranslate.x, uranusTranslate.y, uranusTranslate.z));
+	PxShape* uranusShape = scene.physics->createShape(PxSphereGeometry(40.0), *planetMaterial);
+	uranusBody->attachShape(*uranusShape);
+	uranusShape->release();
+	uranusBody->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
+	uranusBody->userData = uranus;
+	scene.scene->addActor(*uranusBody);
+
+	uranusBody2 = scene.physics->createRigidDynamic(PxTransform(uranus2Translate.x, uranus2Translate.y, uranus2Translate.z));
+	PxShape* uranus2Shape = scene.physics->createShape(PxSphereGeometry(40.0), *planetMaterial);
+	uranusBody2->attachShape(*uranus2Shape);
+	uranus2Shape->release();
+	uranusBody2->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
+	uranusBody2->userData = uranus2;
+	scene.scene->addActor(*uranusBody2);
+
+	neptuneBody = scene.physics->createRigidDynamic(PxTransform(neptuneTranslate.x, neptuneTranslate.y, neptuneTranslate.z));
+	PxShape* neptuneShape = scene.physics->createShape(PxSphereGeometry(39.0), *planetMaterial);
+	neptuneBody->attachShape(*neptuneShape);
+	neptuneShape->release();
+	neptuneBody->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
+	neptuneBody->userData = neptune;
+	scene.scene->addActor(*neptuneBody);
+
+	neptuneBody2 = scene.physics->createRigidDynamic(PxTransform(neptune2Translate.x, neptune2Translate.y, neptune2Translate.z));
+	PxShape* neptune2Shape = scene.physics->createShape(PxSphereGeometry(39.0), *planetMaterial);
+	neptuneBody2->attachShape(*neptune2Shape);
+	neptune2Shape->release();
+	neptuneBody2->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
+	neptuneBody2->userData = neptune2;
+	scene.scene->addActor(*neptuneBody2);
 }
 
 void updateTransforms()
@@ -489,42 +608,25 @@ void createObjects() {
 	}
 
 	mercury = new Planet(programTexture, &sphereModel, glm::translate(mercuryTranslate), textureMercury, sunPos, sunPos2);
-	//renderables.emplace_back(mercury);
-	std::shared_ptr<Planet> venus = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureVenus, sunPos, sunPos2);
-	//renderables.emplace_back(venus);
-	std::shared_ptr<Planet> earth = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureEarth, sunPos, sunPos2);
-	//renderables.emplace_back(earth);
-	std::shared_ptr<Planet> mars = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureMars, sunPos, sunPos2);
-	//renderables.emplace_back(mars);
-	std::shared_ptr<Planet> jupiter = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureJupiter, sunPos, sunPos2);
-	//renderables.emplace_back(jupiter);
-	std::shared_ptr<Planet> saturn = Planet::create(programTexture, &saturnModel, planetDefaultMatrix, textureSaturn, sunPos, sunPos2);
-	//renderables.emplace_back(saturn);
-	std::shared_ptr<Planet> uranus = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureUranus, sunPos, sunPos2);
-	//renderables.emplace_back(uranus);
-	std::shared_ptr<Planet> neptune = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureNeptune, sunPos, sunPos2);
-	//renderables.emplace_back(neptune);
+	venus = new Planet(programTexture, &sphereModel, glm::translate(venusTranslate), textureVenus, sunPos, sunPos2);
+	earth = new Planet(programTexture, &sphereModel, glm::translate(earthTranslate), textureEarth, sunPos, sunPos2);
+	mars = new Planet(programTexture, &sphereModel, glm::translate(marsTranslate), textureMars, sunPos, sunPos2);
+	jupiter = new Planet(programTexture, &sphereModel, glm::translate(jupiterTranslate), textureJupiter, sunPos, sunPos2);
+	saturn = new Planet(programTexture, &saturnModel, glm::translate(saturnTranslate), textureSaturn, sunPos, sunPos2);
+	uranus = new Planet(programTexture, &sphereModel, glm::translate(uranusTranslate), textureUranus, sunPos, sunPos2);
+	neptune = new Planet(programTexture, &sphereModel, glm::translate(neptuneTranslate), textureNeptune, sunPos, sunPos2);
 
-	std::shared_ptr<Planet> mercury2 = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureMercury, sunPos, sunPos2);
-	//renderables.emplace_back(mercury2);
-	std::shared_ptr<Planet> venus2 = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureVenus, sunPos, sunPos2);
-	//renderables.emplace_back(venus2);
-	std::shared_ptr<Planet> earth2 = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureEarth, sunPos, sunPos2);
-	//renderables.emplace_back(earth2);
-	std::shared_ptr<Planet> mars2 = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureMars, sunPos, sunPos2);
-	//renderables.emplace_back(mars2);
-	std::shared_ptr<Planet> jupiter2 = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureJupiter, sunPos, sunPos2);
-	//renderables.emplace_back(jupiter2);
-	std::shared_ptr<Planet> saturn2 = Planet::create(programTexture, &saturnModel, planetDefaultMatrix, textureSaturn, sunPos, sunPos2);
-	//renderables.emplace_back(saturn2);
-	std::shared_ptr<Planet> uranus2 = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureUranus, sunPos, sunPos2);
-	//renderables.emplace_back(uranus2);
-	std::shared_ptr<Planet> neptune2 = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureNeptune, sunPos, sunPos2);
-	//renderables.emplace_back(neptune2);
-	std::shared_ptr<Planet> moon = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureMercury, sunPos, sunPos2);
-	//renderables.emplace_back(moon);
-	std::shared_ptr<Planet> moon2 = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureMercury, sunPos, sunPos2);
-	//renderables.emplace_back(moon2);
+	mercury2 = new Planet(programTexture, &sphereModel, glm::translate(mercury2Translate), textureMercury, sunPos, sunPos2);
+	venus2 = new Planet(programTexture, &sphereModel, glm::translate(venus2Translate), textureVenus, sunPos, sunPos2);
+	earth2 = new Planet(programTexture, &sphereModel, glm::translate(earth2Translate), textureEarth, sunPos, sunPos2);
+	mars2 = new Planet(programTexture, &sphereModel, glm::translate(mars2Translate), textureMars, sunPos, sunPos2);
+	jupiter2 = new Planet(programTexture, &sphereModel, glm::translate(jupiter2Translate), textureJupiter, sunPos, sunPos2);
+	saturn2 = new Planet(programTexture, &saturnModel, glm::translate(saturn2Translate), textureSaturn, sunPos, sunPos2);
+	uranus2 = new Planet(programTexture, &sphereModel, glm::translate(uranus2Translate), textureUranus, sunPos, sunPos2);
+	neptune2 = new Planet(programTexture, &sphereModel, glm::translate(neptune2Translate), textureNeptune, sunPos, sunPos2);
+
+	//moon = new Planet(programTexture, &sphereModel, planetDefaultMatrix, textureMercury, sunPos, sunPos2);
+	//moon2 = new Planet(programTexture, &sphereModel, planetDefaultMatrix, textureMercury, sunPos, sunPos2);
 
 	std::shared_ptr<Planet> gunSight1 = Planet::create(programSight, &planeModel, sightDefaultMatrix, sunPos, sunPos2);
 	std::shared_ptr<Planet> gunSight2 = Planet::create(programSight, &planeModel, sightDefaultMatrix, sunPos, sunPos2);
@@ -570,89 +672,132 @@ void drawObjects() {
 		obj->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);
 	}
 
-	//mercury
+	//overall rotation matrix for planets
 	glm::mat4 planetRotation = glm::rotate(3.14f / 2.f * timeF / 2, glm::vec3(0.0f, 1.0f, 0.0f));
+
+	//mercury
 	mercuryTranslate = glm::vec3(sunPos.x + 170.0f * sinf(timeF / 8), sunPos.y, sunPos.z + 170.0f * cosf(timeF / 8));
 	mercury->setMatrix(glm::translate(mercuryTranslate) * planetRotation * glm::scale(glm::vec3(20 * 0.48f)));
 	mercuryBody->setKinematicTarget(PxTransform(mercury->getMatrix()[3][0], mercury->getMatrix()[3][1], mercury->getMatrix()[3][2]));
 	mercury->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);
 	//
 
-	/*for (auto obj : Planet::planet_objects) {
-		if (counter == 0) {
-			mercuryTranslate = glm::vec3(sunPos.x + 170.0f * sinf(timeF / 8), sunPos.y, sunPos.z + 170.0f * cosf(timeF / 8));
-			obj->setMatrix(glm::translate(mercuryTranslate) * planetRotation * glm::scale(glm::vec3(20 * 0.48f)));
-		}
-		if (counter == 1) {
-			venusTranslate = glm::vec3(sunPos.x + -260.0f * sinf(timeF / 10), sunPos.y, sunPos.z + -260.0f * cosf(timeF / 10));
-			obj->setMatrix(glm::translate(venusTranslate) * planetRotation * glm::scale(glm::vec3(15 * 1.21f)));
-		}
-		if (counter == 2) {
-			earthTranslate = glm::vec3(sunPos.x + 350.0f * sinf(timeF / 12), sunPos.y, sunPos.z + 350.0f * cosf(timeF / 12));
-			obj->setMatrix(glm::translate(earthTranslate) * planetRotation * glm::scale(glm::vec3(15 * 1.27f)));
-		}
-		if (counter == 3) {
-			marsTranslate = glm::vec3(sunPos.x + -440.0f * sinf(timeF / 14), sunPos.y, sunPos.z + -440.0 * cosf(timeF / 14));
-			obj->setMatrix(glm::translate(marsTranslate) * planetRotation * glm::scale(glm::vec3(20 * 0.68f)));
-		}
-		if (counter == 4) {
-			jupiterTranslate = glm::vec3(sunPos.x + 800.0f * sinf(timeF / 16), sunPos.y, sunPos.z + 800.0f * cosf(timeF / 16));
-			obj->setMatrix(glm::translate(jupiterTranslate) * planetRotation * glm::scale(glm::vec3(7 * 7.1f)));
-		}
-		if (counter == 5) {
-			saturnTranslate = glm::vec3(sunPos.x + -1100.0f * sinf(timeF / 18), sunPos.y, sunPos.z + -1100.0f * cosf(timeF / 18));
-			obj->setMatrix(glm::translate(saturnTranslate) * planetRotation * glm::rotate(glm::radians(90.0f), glm::vec3(1, 0, 0)) *glm::scale(glm::vec3(6.0f / 40)));
-		}
-		if (counter == 6) {
-			uranusTranslate = glm::vec3(sunPos.x + 1400.0f * sinf(timeF / 20), sunPos.y, sunPos.z + 1400.0f * cosf(timeF / 20));
-			obj->setMatrix(glm::translate(uranusTranslate) * planetRotation * glm::scale(glm::vec3(40.0f)));
-		}
-		if (counter == 7) {
-			neptuneTranslate = glm::vec3(sunPos.x + -1700.0f * sinf(timeF / 22), sunPos.y, sunPos.z + -1700.0f * cosf(timeF / 22));
-			obj->setMatrix(glm::translate(neptuneTranslate) * planetRotation * glm::scale(glm::vec3(39.0f)));
-		}
-		if (counter == 8) {
-			mercury2Translate = glm::vec3(sunPos2.x + 170.0f * sinf(timeF / 8), sunPos2.y, sunPos2.z + 170.0f * cosf(timeF / 8));
-			obj->setMatrix(glm::translate(mercury2Translate) * planetRotation * glm::scale(glm::vec3(20 * 0.48f)));
-		}
-		if (counter == 9) {
-			venus2Translate = glm::vec3(sunPos2.x + -260.0f * sinf(timeF / 10), sunPos2.y, sunPos2.z + -260.0f * cosf(timeF / 10));
-			obj->setMatrix(glm::translate(venus2Translate) * planetRotation * glm::scale(glm::vec3(15 * 1.21f)));
-		}
-		if (counter == 10) {
-			earth2Translate = glm::vec3(sunPos2.x + 350.0f * sinf(timeF / 12), sunPos2.y, sunPos2.z + 350.0f * cosf(timeF / 12));
-			obj->setMatrix(glm::translate(earth2Translate) * planetRotation * glm::scale(glm::vec3(15 * 1.27f)));
-		}
-		if (counter == 11) {
-			mars2Translate = glm::vec3(sunPos2.x + -440.0f * sinf(timeF / 14), sunPos2.y, sunPos2.z + -440.0 * cosf(timeF / 14));
-			obj->setMatrix(glm::translate(mars2Translate) * planetRotation * glm::scale(glm::vec3(20 * 0.68f)));
-		}
-		if (counter == 12) {
-			jupiter2Translate = glm::vec3(sunPos2.x + 800.0f * sinf(timeF / 16), sunPos2.y, sunPos2.z + 800.0f * cosf(timeF / 16));
-			obj->setMatrix(glm::translate(jupiter2Translate) * planetRotation * glm::scale(glm::vec3(7 * 7.1f)));
-		}
-		if (counter == 13) {
-			saturn2Translate = glm::vec3(sunPos2.x + -1100.0f * sinf(timeF / 18), sunPos2.y, sunPos2.z + -1100.0f * cosf(timeF / 18));
-			obj->setMatrix(glm::translate(saturn2Translate) * planetRotation * glm::rotate(glm::radians(90.0f), glm::vec3(1, 0, 0)) * glm::scale(glm::vec3(6.0f / 40)));
-		}
-		if (counter == 14) {
-			uranus2Translate = glm::vec3(sunPos2.x + 1400.0f * sinf(timeF / 20), sunPos2.y, sunPos2.z + 1400.0f * cosf(timeF / 20));
-			obj->setMatrix(glm::translate(uranus2Translate) * planetRotation * glm::scale(glm::vec3(40.0f)));
-		}
-		if (counter == 15) {
-			neptune2Translate = glm::vec3(sunPos2.x + -1700.0f * sinf(timeF / 22), sunPos2.y, sunPos2.z + -1700.0f * cosf(timeF / 22));
-			obj->setMatrix(glm::translate(neptune2Translate) * planetRotation * glm::scale(glm::vec3(39.0f)));
-		}
-		if (counter == 16) {
+	//venus
+	venusTranslate = glm::vec3(sunPos.x + -260.0f * sinf(timeF / 10), sunPos.y, sunPos.z + -260.0f * cosf(timeF / 10));
+	venus->setMatrix(glm::translate(venusTranslate) * planetRotation * glm::scale(glm::vec3(15 * 1.21f)));
+	venusBody->setKinematicTarget(PxTransform(venus->getMatrix()[3][0], venus->getMatrix()[3][1], venus->getMatrix()[3][2]));
+	venus->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);
+	//
+
+	//earth
+	earthTranslate = glm::vec3(sunPos.x + 350.0f * sinf(timeF / 12), sunPos.y, sunPos.z + 350.0f * cosf(timeF / 12));
+	earth->setMatrix(glm::translate(earthTranslate) * planetRotation * glm::scale(glm::vec3(15 * 1.27f)));
+	earthBody->setKinematicTarget(PxTransform(earth->getMatrix()[3][0], earth->getMatrix()[3][1], earth->getMatrix()[3][2]));
+	earth->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);
+	//
+
+	//mars
+	marsTranslate = glm::vec3(sunPos.x + -440.0f * sinf(timeF / 14), sunPos.y, sunPos.z + -440.0 * cosf(timeF / 14));
+	mars->setMatrix(glm::translate(marsTranslate) * planetRotation * glm::scale(glm::vec3(20 * 0.68f)));
+	marsBody->setKinematicTarget(PxTransform(mars->getMatrix()[3][0], mars->getMatrix()[3][1], mars->getMatrix()[3][2]));
+	mars->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);
+	//
+
+	//jupiter
+	jupiterTranslate = glm::vec3(sunPos.x + 800.0f * sinf(timeF / 16), sunPos.y, sunPos.z + 800.0f * cosf(timeF / 16));
+	jupiter->setMatrix(glm::translate(jupiterTranslate) * planetRotation * glm::scale(glm::vec3(7 * 7.1f)));
+	jupiterBody->setKinematicTarget(PxTransform(jupiter->getMatrix()[3][0], jupiter->getMatrix()[3][1], jupiter->getMatrix()[3][2]));
+	jupiter->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);
+	//
+
+	//saturn
+	saturnTranslate = glm::vec3(sunPos.x + -1100.0f * sinf(timeF / 18), sunPos.y, sunPos.z + -1100.0f * cosf(timeF / 18));
+	saturn->setMatrix(glm::translate(saturnTranslate) * planetRotation * glm::rotate(glm::radians(90.0f), glm::vec3(1, 0, 0)) * glm::scale(glm::vec3(6.0f / 40)));
+	saturnBody->setKinematicTarget(PxTransform(saturn->getMatrix()[3][0], saturn->getMatrix()[3][1], saturn->getMatrix()[3][2]));
+	saturn->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);
+	//
+
+	//uranus
+	uranusTranslate = glm::vec3(sunPos.x + 1400.0f * sinf(timeF / 20), sunPos.y, sunPos.z + 1400.0f * cosf(timeF / 20));
+	uranus->setMatrix(glm::translate(uranusTranslate) * planetRotation * glm::scale(glm::vec3(40.0f)));
+	uranusBody->setKinematicTarget(PxTransform(uranus->getMatrix()[3][0], uranus->getMatrix()[3][1], uranus->getMatrix()[3][2]));
+	uranus->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);
+	//
+
+	//neptune
+	neptuneTranslate = glm::vec3(sunPos.x + -1700.0f * sinf(timeF / 22), sunPos.y, sunPos.z + -1700.0f * cosf(timeF / 22));
+	neptune->setMatrix(glm::translate(neptuneTranslate) * planetRotation * glm::scale(glm::vec3(39.0f)));
+	neptuneBody->setKinematicTarget(PxTransform(neptune->getMatrix()[3][0], neptune->getMatrix()[3][1], neptune->getMatrix()[3][2]));
+	neptune->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);
+	//
+
+	//mercury2
+	mercury2Translate = glm::vec3(sunPos2.x + 170.0f * sinf(timeF / 8), sunPos2.y, sunPos2.z + 170.0f * cosf(timeF / 8));
+	mercury2->setMatrix(glm::translate(mercury2Translate) * planetRotation * glm::scale(glm::vec3(20 * 0.48f)));
+	mercuryBody2->setKinematicTarget(PxTransform(mercury2->getMatrix()[3][0], mercury2->getMatrix()[3][1], mercury2->getMatrix()[3][2]));
+	mercury2->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);
+	//
+
+	//venus2
+	venus2Translate = glm::vec3(sunPos2.x + -260.0f * sinf(timeF / 10), sunPos2.y, sunPos2.z + -260.0f * cosf(timeF / 10));
+	venus2->setMatrix(glm::translate(venus2Translate) * planetRotation * glm::scale(glm::vec3(15 * 1.21f)));
+	venusBody2->setKinematicTarget(PxTransform(venus2->getMatrix()[3][0], venus2->getMatrix()[3][1], venus2->getMatrix()[3][2]));
+	venus2->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);
+	//
+
+	//earth2
+	earth2Translate = glm::vec3(sunPos2.x + 350.0f * sinf(timeF / 12), sunPos2.y, sunPos2.z + 350.0f * cosf(timeF / 12));
+	earth2->setMatrix(glm::translate(earth2Translate) * planetRotation * glm::scale(glm::vec3(15 * 1.27f)));
+	earthBody2->setKinematicTarget(PxTransform(earth2->getMatrix()[3][0], earth2->getMatrix()[3][1], earth2->getMatrix()[3][2]));
+	earth2->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);
+	//
+
+	//mars2
+	mars2Translate = glm::vec3(sunPos2.x + -440.0f * sinf(timeF / 14), sunPos2.y, sunPos2.z + -440.0 * cosf(timeF / 14));
+	mars2->setMatrix(glm::translate(mars2Translate) * planetRotation * glm::scale(glm::vec3(20 * 0.68f)));
+	marsBody2->setKinematicTarget(PxTransform(mars2->getMatrix()[3][0], mars2->getMatrix()[3][1], mars2->getMatrix()[3][2]));
+	mars2->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);
+	//
+	
+	//jupiter2
+	jupiter2Translate = glm::vec3(sunPos2.x + 800.0f * sinf(timeF / 16), sunPos2.y, sunPos2.z + 800.0f * cosf(timeF / 16));
+	jupiter2->setMatrix(glm::translate(jupiter2Translate)* planetRotation* glm::scale(glm::vec3(7 * 7.1f)));
+	jupiterBody2->setKinematicTarget(PxTransform(jupiter2->getMatrix()[3][0], jupiter2->getMatrix()[3][1], jupiter2->getMatrix()[3][2]));
+	jupiter2->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);
+	//
+	
+	//saturn2
+	saturn2Translate = glm::vec3(sunPos2.x + -1100.0f * sinf(timeF / 18), sunPos2.y, sunPos2.z + -1100.0f * cosf(timeF / 18));
+	saturn2->setMatrix(glm::translate(saturn2Translate) * planetRotation * glm::rotate(glm::radians(90.0f), glm::vec3(1, 0, 0)) * glm::scale(glm::vec3(6.0f / 40)));
+	saturnBody2->setKinematicTarget(PxTransform(saturn2->getMatrix()[3][0], saturn2->getMatrix()[3][1], saturn2->getMatrix()[3][2]));
+	saturn2->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);
+	//
+
+	//uranus2
+	uranus2Translate = glm::vec3(sunPos2.x + 1400.0f * sinf(timeF / 20), sunPos2.y, sunPos2.z + 1400.0f * cosf(timeF / 20));
+	uranus2->setMatrix(glm::translate(uranus2Translate)* planetRotation* glm::scale(glm::vec3(40.0f)));
+	uranusBody2->setKinematicTarget(PxTransform(uranus2->getMatrix()[3][0], uranus2->getMatrix()[3][1], uranus2->getMatrix()[3][2]));
+	uranus2->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);
+	//
+
+	//neptune2
+	neptune2Translate = glm::vec3(sunPos2.x + -1700.0f * sinf(timeF / 22), sunPos2.y, sunPos2.z + -1700.0f * cosf(timeF / 22));
+	neptune2->setMatrix(glm::translate(neptune2Translate)* planetRotation* glm::scale(glm::vec3(39.0f)));
+	neptuneBody2->setKinematicTarget(PxTransform(neptune2->getMatrix()[3][0], neptune2->getMatrix()[3][1], neptune2->getMatrix()[3][2]));
+	neptune2->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);
+	//
+		//KSIEZYCE !!!
+		/*if (counter == 16) {
 			moonTranslate = glm::vec3((sunPos.x + 350.0f * sinf(timeF / 12)) + 40 * sinf(timeF), sunPos.y, (sunPos.z + 350.0f * cosf(timeF / 12)) + 40 * cosf(timeF));
 			obj->setMatrix(glm::translate(moonTranslate)* glm::scale(glm::vec3(0.25f)) * planetRotation* glm::scale(glm::vec3(15 * 1.27f)));
 		}
 		if (counter == 17) {
 			moon2Translate = glm::vec3((sunPos2.x + 350.0f * sinf(timeF / 12)) + 40 * sinf(timeF), sunPos2.y, (sunPos2.z + 350.0f * cosf(timeF / 12)) + 40 * cosf(timeF));
 			obj->setMatrix(glm::translate(moon2Translate) * glm::scale(glm::vec3(0.25f)) * planetRotation * glm::scale(glm::vec3(15 * 1.27f)));
-		}
-		obj->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);
-		if (counter == 18 && mouseKeyDown) {
+		}*/
+
+		//CELOWNIK !!!
+		/*if (counter == 18 && mouseKeyDown) {
 			obj->setMatrix(glm::translate(glm::vec3(cameraPos.x, cameraPos.y, cameraPos.z + 3)) * glm::scale(glm::vec3(0.015f, 0.001f, 0.015f)));
 			obj->draw(glm::vec3(1.0f), cameraPos, perspectiveMatrix, cameraMatrix);
 			text(swidth/2, sheight/2, "+", 20);
@@ -660,10 +805,7 @@ void drawObjects() {
 		if (counter == 19 && mouseKeyDown) {
 			obj->setMatrix(ship->getMatrix() * glm::scale(glm::vec3(0.001f, 0.015f, 0.001f)));
 			obj->draw(glm::vec3(1.0f), cameraPos, perspectiveMatrix, cameraMatrix);
-		}
-		counter++;
-	}*/
-	counter = 0;
+		}*/
 	if (effect) {
 		if (effect->isActive()) {
 			effect->sendProjectionToShader(perspectiveMatrix, cameraMatrix, ship->getMatrix());
