@@ -310,8 +310,8 @@ glm::mat4 createCameraMatrix()
 	PxTransform pxtr = shipBody->getGlobalPose();
 	glm::quat pxtq = glm::quat(pxtr.q.w, pxtr.q.x, pxtr.q.y, pxtr.q.z);
 	glm::vec3 cameraDirMat = pxtq * glm::vec3(0, 0, 1);
-	glm::vec3 offset = cameraDirMat * 2.0f;
-	cameraPos = offset + glm::vec3(pxtr.p.x, pxtr.p.y, pxtr.p.z);
+	glm::vec3 offset = cameraDirMat * 0.65f;
+	cameraPos = offset + glm::vec3(pxtr.p.x, pxtr.p.y - 0.65f, pxtr.p.z);
 
 
 	/*glUseProgram(programTexture);
@@ -320,7 +320,7 @@ glm::mat4 createCameraMatrix()
 
 	glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
-	glm::vec3 cameraTarget = glm::vec3(pxtr.p.x, pxtr.p.y, pxtr.p.z);
+	glm::vec3 cameraTarget = glm::vec3(pxtr.p.x, pxtr.p.y - 0.65f, pxtr.p.z);
 	glm::vec3 cameraDirection = glm::normalize(cameraPos - cameraTarget);
 
 	cameraDir = cameraDirection;
