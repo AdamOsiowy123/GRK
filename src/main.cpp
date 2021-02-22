@@ -32,7 +32,7 @@ double physicsTimeToProcess = 0;
 /// SCENE
 
 /// PHYSICS SHIP
-Ship ship;
+Ship* ship;
 PxRigidDynamic* shipBody = nullptr;
 PxMaterial* shipMaterial = nullptr;
 float F_front = 0.0f;
@@ -56,7 +56,7 @@ obj::Model saturnModel;
 obj::Model planeModel;
 obj::Model ufoModel;
 
-glm::vec3 cameraPos = glm::vec3(300, 2, 300);
+glm::vec3 cameraPos;
 glm::vec3 cameraDir; // Wektor "do przodu" kamery
 glm::vec3 cameraSide; // Wektor "w bok" kamery
 float cameraAngle = 0;
@@ -147,7 +147,7 @@ void initPhysicsScene()
 	shipBody->attachShape(*shipShape);
 	shipShape->release();
 	//shipBody->setActorFlag(PxActorFlag::eDISABLE_GRAVITY, true);
-	shipBody->userData = &ship.getMatrix();
+	shipBody->userData = ship;
 	scene.scene->addActor(*shipBody);
 }
 
@@ -165,7 +165,8 @@ void updateTransforms()
 			// We use the userData of the objects to set up the model matrices
 			// of proper renderables.
 			if (!actor->userData) continue;
-			glm::mat4* modelMatrix = (glm::mat4*)actor->userData;
+			//glm::mat4* modelMatrix = (glm::mat4*)actor->userData;
+			Ship* ship = (Ship*)actor->userData;
 
 			// get world matrix of the object (actor)
 			PxMat44 transform = actor->getGlobalPose();
@@ -176,11 +177,11 @@ void updateTransforms()
 			auto& c3 = transform.column3;
 
 			// set up the model matrix used for the rendering
-			*modelMatrix = glm::mat4(
+			ship->setMatrix(glm::mat4(
 				c0.x, c0.y, c0.z, c0.w,
 				c1.x, c1.y, c1.z, c1.w,
 				c2.x, c2.y, c2.z, c2.w,
-				c3.x, c3.y, c3.z, c3.w);
+				c3.x, c3.y, c3.z, c3.w));
 		}
 	}
 }
@@ -195,10 +196,10 @@ void keyboard(unsigned char key, int x, int y)
 	{
 	case 'z': roznicaZ = -20.0f; break;
 	case 'x': roznicaZ = 20.0f; break;
-	case 'w': F_front += 10; break;
-	case 's': F_front -= 10; break;
-	case 'd': F_side -= 5; break;
-	case 'a': F_side += 5; break;
+	case 'w': F_front -= 10; break;
+	case 's': F_front += 10; break;
+	case 'd': F_side += 5; break;
+	case 'a': F_side -= 5; break;
 	case 'm': shipAngle += glm::radians(2.0f); break;
 	case 'f': freeLook = !freeLook; lastRotation = rotation; break;
 	}
@@ -327,6 +328,7 @@ glm::mat4 createCameraMatrix()
 	glm::mat4 returnowaTablica = glm::lookAt(cameraPos, cameraPos - cameraDirection, cameraUp);
 
 	return glm::translate(glm::vec3(0, -1, 0)) * returnowaTablica;
+
 }
 
 void createObjects() {
@@ -347,8 +349,8 @@ void createObjects() {
 		wspolrzedne[i] = glm::vec3(asteroid2D.x + sunPos2.x, rand() % 50 - 50 + sunPos2.y, asteroid2D.y + sunPos2.z);
 	}
 
-	ship = Ship(programColor, &shipModel, sunPos, sunPos2, glm::vec3(0.6f));
-	ship.setMatrix(glm::translate(glm::vec3(0.0f))*glm::rotate(shipAngle,glm::vec3(0,1,0))*glm::scale(glm::vec3(0.0008f)));
+	ship = new Ship(programColor, &shipModel, sunPos, sunPos2, glm::vec3(0.6f));
+	ship->setMatrix(glm::translate(glm::vec3(0.0f))*glm::rotate(shipAngle,glm::vec3(0,1,0))*glm::scale(glm::vec3(0.0008f)));
 
 	std::shared_ptr<Ufo> ufo = Ufo::create(programUfo, &ufoModel, planetDefaultMatrix, textureUfo, sunPos, sunPos2);
 	//renderables.emplace_back(ufo);
@@ -428,7 +430,7 @@ void drawObjects() {
 	// ship
 	//ship.setMatrix(shipModelMatrix);
 	//shipBody->userData = &ship.getMatrix();
-	ship.draw(ship.getColor(), cameraPos, perspectiveMatrix, cameraMatrix);
+	ship->draw(ship->getColor(), cameraPos, perspectiveMatrix, cameraMatrix);
 	//
 
 	for (auto obj : Ufo::ufo_objects) {
@@ -529,7 +531,7 @@ void drawObjects() {
 	counter = 0;
 	if (effect) {
 		if (effect->isActive()) {
-			effect->sendProjectionToShader(perspectiveMatrix, cameraMatrix, ship.getMatrix());
+			effect->sendProjectionToShader(perspectiveMatrix, cameraMatrix, ship->getMatrix());
 			effect->simulate();
 		}
 	}
@@ -553,7 +555,9 @@ void renderScene()
 	}
 	//shipBody->setAngularVelocity();
 	shipBody->setLinearVelocity(PxVec3(0, 0, 0));
-	PxRigidBodyExt::addLocalForceAtLocalPos(*shipBody, PxVec3(F_side, 0, 0), PxVec3(0, 0, 0));
+	shipBody->setAngularVelocity(PxVec3(0, 0, 0));
+
+	PxRigidBodyExt::addLocalForceAtLocalPos(*shipBody, PxVec3(0, 0, F_side), PxVec3(2, 0, 0));
 	PxRigidBodyExt::addLocalForceAtLocalPos(*shipBody, PxVec3(0, 0, F_front), PxVec3(0, 0, 0));
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
