@@ -72,7 +72,7 @@ glm::vec3 sunColor = glm::vec3(1.0f, 0.5f, 0.2f);
 glm::mat4 planetDefaultMatrix = glm::translate(glm::vec3(0.0f));
 glm::mat4 sightDefaultMatrix = glm::translate(glm::vec3(100000.0f));
 
-glm::quat rotation = glm::quat(1, 0, 0, 0);
+glm::quat rotation = glm::quat(0, 0, 0, 0);
 float shipAngle = glm::radians(180.0f);
 float frustumScale = 1.0f;
 
@@ -119,11 +119,10 @@ glm::vec3 wektor[4] = {
 	glm::vec3(0.0f), glm::vec3(40.0f), glm::vec3(80.0f), glm::vec3(120.0f)
 };
 
-int roznicaX;
-int roznicaY;
-int ostatniX = 300;
-int ostatniY = 300;
-int roznicaZ;
+float roznicaX, roznicaY, roznicaZ;
+float ostatniX = 300;
+float ostatniY = 300;
+float ostatniZ = 0;
 int counter = 0;
 float lastTimeF = -1.0f;
 glm::quat lastRotation;
@@ -201,16 +200,18 @@ void keyboard(unsigned char key, int x, int y)
 	case 'd': F_side += 5; break;
 	case 'a': F_side -= 5; break;
 	case 'm': shipAngle += glm::radians(2.0f); break;
-	case 'f': freeLook = !freeLook; lastRotation = rotation; break;
+	case 'f': freeLook = !freeLook; break;
 	}
 }
 
 void mouse(int x, int y)
-{
-	roznicaX = x - ostatniX;
-	roznicaY = y - ostatniY;
-	ostatniX = x;
-	ostatniY = y;
+{	
+	if (freeLook) {
+		roznicaX = (x - ostatniX) / 100.0f;
+		roznicaY = (y - ostatniY) / 100.0f;
+		ostatniX = x;
+		ostatniY = y;
+	}
 }
 
 void mouseClick(int button, int state, int x, int y) {
@@ -234,6 +235,8 @@ void loadParticleTextures() {
 }
 
 glm::vec3 predictMove() {
+	PxTransform pxtr = shipBody->getGlobalPose();
+	glm::vec3 ship_pos = glm::vec3(pxtr.p.x, pxtr.p.y, pxtr.p.z);
 	float time = glutGet(GLUT_ELAPSED_TIME) / 1000.0f - appLoadingTime;
 	int sekundaRuchu = int(floorf(time));
 	float u³amekSekundy = time - sekundaRuchu;
@@ -246,7 +249,7 @@ glm::vec3 predictMove() {
 	wspolrzedneUfo[1] = wspolrzedneUfo[2];
 	wspolrzedneUfo[2] = wspolrzedneUfo[3];
 	glm::vec3 newUfo3 = wspolrzedneUfo[3] + glm::sphericalRand(0.7f);
-	bool isCloser = glm::length(newUfo3 - (cameraPos + cameraDir * 0.5f)) < glm::length(wspolrzedneUfo[3] - (cameraPos + cameraDir * 0.5f));
+	bool isCloser = glm::length(newUfo3 - (ship_pos)) < glm::length(wspolrzedneUfo[3] - (ship_pos));
 	bool isSun = glm::length(newUfo3 - sunPos) < 140.0f || glm::length(newUfo3 - sunPos2) < 140.0f;
 	bool isPlanet = glm::length(newUfo3 - mercuryTranslate) < 19.2f || glm::length(newUfo3 - mercury2Translate) < 19.2f || glm::length(newUfo3 - venusTranslate) < 36.3f
 		|| glm::length(newUfo3 - venus2Translate) < 36.3f || glm::length(newUfo3 - earthTranslate) < 78.1f || glm::length(newUfo3 - earth2Translate) < 78.1f
@@ -263,7 +266,7 @@ glm::vec3 predictMove() {
 	}
 	while (isCloser || isSun || isPlanet || isAsteroid) {
 		newUfo3 = wspolrzedneUfo[3] + glm::sphericalRand(0.7f);
-		isCloser = glm::length(newUfo3 - (cameraPos + cameraDir * 0.5f)) < glm::length(wspolrzedneUfo[3] - (cameraPos + cameraDir * 0.5f));
+		isCloser = glm::length(newUfo3 - (ship_pos)) < glm::length(wspolrzedneUfo[3] - (ship_pos));
 		isSun = isSun = glm::length(newUfo3 - sunPos) < 140.0f || glm::length(newUfo3 - sunPos2) < 140.0f;
 		isPlanet = glm::length(newUfo3 - mercuryTranslate) < 19.2f || glm::length(newUfo3 - mercury2Translate) < 19.2f || glm::length(newUfo3 - venusTranslate) < 36.3f
 			|| glm::length(newUfo3 - venus2Translate) < 36.3f || glm::length(newUfo3 - earthTranslate) < 78.1f || glm::length(newUfo3 - earth2Translate) < 78.1f
@@ -279,7 +282,7 @@ glm::vec3 predictMove() {
 			}
 		}
 	}
-	bool isTooFar = glm::length(newUfo3 - (cameraPos + cameraDir * 0.5f)) > 500.0f;
+	bool isTooFar = glm::length(newUfo3 - (ship_pos)) > 500.0f;
 	if (!isTooFar) {
 		wspolrzedneUfo[3] = newUfo3;
 	}
@@ -288,22 +291,33 @@ glm::vec3 predictMove() {
 }
 
 
-/*glm::mat4 createCameraMatrix()
+glm::mat4 createCameraMatrixF()
 {
-	glm::quat Xangle = glm::angleAxis(glm::radians(roznicaX * 1.f), glm::vec3(0.0f, 1.0f, 0.0f));
-	glm::quat Yangle = glm::angleAxis(glm::radians(roznicaY * 1.f), glm::vec3(1.0f, 0.0f, 0.0f));
-	glm::quat Zangle = glm::angleAxis(glm::radians(roznicaZ * 1.f), glm::vec3(0.0f, 0.0f, 1.0f));
+	rotation = glm::quat_cast(cameraMatrix);
+	PxTransform pxtr = shipBody->getGlobalPose();
+	glm::quat pxtq = glm::quat(pxtr.q.w, pxtr.q.x, pxtr.q.y, pxtr.q.z);
+	glm::vec3 cameraDirMat = pxtq * glm::vec3(0, 0, 1);
+	glm::vec3 offset = cameraDirMat * 0.65f;
+	cameraPos = offset + glm::vec3(pxtr.p.x, pxtr.p.y - 0.65f, pxtr.p.z);
+
+	glm::quat kwaternionX = glm::angleAxis(roznicaY, glm::vec3(1, 0, 0));
+	glm::quat kwaternionY = glm::angleAxis(roznicaX, glm::vec3(0, 1, 0));
+	glm::quat kwaternionZ = glm::angleAxis(roznicaZ / 10, glm::vec3(0, 0, 1));
 	roznicaX = 0;
 	roznicaY = 0;
 	roznicaZ = 0;
-	glm::quat rotationChange = Xangle * Yangle * Zangle;
+	glm::quat rotationChange = kwaternionZ * kwaternionY * kwaternionX;
 	rotation = rotationChange * rotation;
 	rotation = glm::normalize(rotation);
-	cameraDir = glm::inverse(rotation) * glm::vec3(0.0f, 0.0f, -1.0f);
-	cameraSide = glm::inverse(rotation) * glm::vec3(1.0f, 0.0f, 0.0f);
 
-	return Core::createViewMatrixQuat(cameraPos, rotation);
-}*/
+	glm::quat inversedRotation;
+	inversedRotation = glm::inverse(rotation);
+
+	cameraDir = inversedRotation * glm::vec3(0.0f, 0.0f, -1.0f);
+	cameraSide = inversedRotation * glm::vec3(1.0f, 0.0f, 0.0f);
+
+	return glm::translate(glm::vec3(0,-1,0))*Core::createViewMatrixQuat(cameraPos, rotation);
+}
 
 glm::mat4 createCameraMatrix()
 {
@@ -312,11 +326,6 @@ glm::mat4 createCameraMatrix()
 	glm::vec3 cameraDirMat = pxtq * glm::vec3(0, 0, 1);
 	glm::vec3 offset = cameraDirMat * 0.65f;
 	cameraPos = offset + glm::vec3(pxtr.p.x, pxtr.p.y - 0.65f, pxtr.p.z);
-
-
-	/*glUseProgram(programTexture);
-	glUniform3f(glGetUniformLocation(programTexture, "viewPos"), pxtr.p.x, pxtr.p.y + 3, pxtr.p.z + 8);
-	glUseProgram(0);*/
 
 	glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
@@ -564,7 +573,12 @@ void renderScene()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.1f, 0.3f, 1.0f);
 
-	cameraMatrix = createCameraMatrix();
+	if (!freeLook) {
+		cameraMatrix = createCameraMatrix();
+	}
+	else {
+		cameraMatrix = createCameraMatrixF();
+	}
 	perspectiveMatrix = Core::createPerspectiveMatrix(frustumScale);
 
 	updateTransforms();
