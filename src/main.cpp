@@ -350,7 +350,7 @@ void createObjects() {
 	}
 
 	ship = new Ship(programColor, &shipModel, sunPos, sunPos2, glm::vec3(0.6f));
-	ship->setMatrix(glm::translate(glm::vec3(0.0f))*glm::rotate(shipAngle,glm::vec3(0,1,0))*glm::scale(glm::vec3(0.0008f)));
+	ship->setMatrix(glm::rotate(shipAngle,glm::vec3(0,1,0))*glm::scale(glm::vec3(0.0008f)));
 
 	std::shared_ptr<Ufo> ufo = Ufo::create(programUfo, &ufoModel, planetDefaultMatrix, textureUfo, sunPos, sunPos2);
 	//renderables.emplace_back(ufo);
@@ -430,6 +430,7 @@ void drawObjects() {
 	// ship
 	//ship.setMatrix(shipModelMatrix);
 	//shipBody->userData = &ship.getMatrix();
+	ship->setMatrix(ship->getMatrix() * glm::rotate(shipAngle, glm::vec3(0, 1, 0)) * glm::scale(glm::vec3(0.0008f)));
 	ship->draw(ship->getColor(), cameraPos, perspectiveMatrix, cameraMatrix);
 	//
 
