@@ -23,8 +23,6 @@
 #include "Physics.h"
 #include "Object.h"
 
-std::vector<Object*> renderables;
-
 /// SCENE
 Physics scene(0 /* gravity (m/s^2) */);
 const double physicsStepTime = 1.f / 60.f;
@@ -40,6 +38,12 @@ float F_side = 0.0f;
 float F_qe = 0.0f;
 float F_zc = 0.0f;
 /// PHYSICS SHIP
+
+/// PHYSICS ASTEROIDs
+Asteroid* asteroids[280];
+PxRigidDynamic* asteroidsBody[280];
+PxMaterial* asteroidMaterial = nullptr;
+/// PHYSICS ASTEROIDs
 
 GLuint programParticle;
 GLuint programSkybox;
@@ -142,16 +146,24 @@ float swidth = 650.0f, sheight = 650.0f;
 
 void initPhysicsScene()
 {
-	glm::vec3 t = cameraPos + cameraDir * 0.5f;
 	shipBody = scene.physics->createRigidDynamic(PxTransform(0,0,0));
 	shipMaterial = scene.physics->createMaterial(1, 1, 0.6);
-	//PxShape* shipShape = pxScene.physics->createShape(PxBoxGeometry(7, 5, 2.3f), *shipMaterial);
 	PxShape* shipShape = scene.physics->createShape(PxBoxGeometry(1, 1, 1), *shipMaterial);
 	shipBody->attachShape(*shipShape);
 	shipShape->release();
-	//shipBody->setActorFlag(PxActorFlag::eDISABLE_GRAVITY, true);
 	shipBody->userData = ship;
 	scene.scene->addActor(*shipBody);
+
+	for (int i=0; i < 280; i++) {
+		asteroidsBody[i] = scene.physics->createRigidDynamic(PxTransform(wspolrzedne[i].x,wspolrzedne[i].y,wspolrzedne[i].z));
+		asteroidMaterial = scene.physics->createMaterial(1, 1, 0.6);
+		PxShape* asteroidShape = scene.physics->createShape(PxSphereGeometry(1), *asteroidMaterial);
+		asteroidsBody[i]->attachShape(*asteroidShape);
+		asteroidShape->release();
+		asteroidsBody[i]->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
+		asteroidsBody[i]->userData = asteroids[i];
+		scene.scene->addActor(*asteroidsBody[i]);
+	}
 }
 
 void updateTransforms()
@@ -169,7 +181,7 @@ void updateTransforms()
 			// of proper renderables.
 			if (!actor->userData) continue;
 			//glm::mat4* modelMatrix = (glm::mat4*)actor->userData;
-			Ship* ship = (Ship*)actor->userData;
+			Object* obj = (Object*)actor->userData;
 
 			// get world matrix of the object (actor)
 			PxMat44 transform = actor->getGlobalPose();
@@ -180,7 +192,7 @@ void updateTransforms()
 			auto& c3 = transform.column3;
 
 			// set up the model matrix used for the rendering
-			ship->setMatrix(glm::mat4(
+			obj->setMatrix(glm::mat4(
 				c0.x, c0.y, c0.z, c0.w,
 				c1.x, c1.y, c1.z, c1.w,
 				c2.x, c2.y, c2.z, c2.w,
@@ -217,7 +229,6 @@ void text(int x, int y, std::string text, int rozmiar)
 
 void keyboard(unsigned char key, int x, int y)
 {
-	
 	float angleSpeed = 0.1f;
 	//float moveSpeed = 0.1f;
 	float moveSpeed = 10.0f;

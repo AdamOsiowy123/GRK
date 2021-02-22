@@ -35,6 +35,7 @@ public:
 	GLuint getProgram() { return program; }
 	obj::Model* getModel() { return model; }
 	glm::mat4 getMatrix() { return matrix; }
+	void setMatrix(glm::mat4 matrix);
 	GLuint getTexture() { return texture; }
 	glm::vec3 getLightPos() { return lightPos; }
 	glm::vec3 getLightPos2() { return lightPos2; }

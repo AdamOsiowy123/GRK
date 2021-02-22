@@ -37,6 +37,11 @@ void Object::drawTexture(glm::vec3 cameraPos, glm::mat4 perspectiveMatrix, glm::
 	glUseProgram(0);
 }
 
+void Object::setMatrix(glm::mat4 matrix)
+{
+	this->matrix = matrix;
+}
+
 /*void Object::setTranslation(glm::vec3 translation)
 {
 	this->translation = translation;
