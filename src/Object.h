@@ -10,6 +10,7 @@
 #include "Render_Utils.h"
 #include "Camera.h"
 #include "Texture.h"
+//#include "Physics.h"
 
 using namespace std;
 class Object
@@ -21,6 +22,12 @@ protected:
 	GLuint texture;
 	glm::vec3 lightPos;
 	glm::vec3 lightPos2;
+	//PxMaterial* material;
+	//PxRigidDynamic* body;
+	//PxShape* shape;
+	//Physics* scene;
+	//glm::vec3 translation;
+	//glm::vec3 size;
 public:
 	Object();
 	void draw(glm::vec3 color, glm::vec3 cameraPos, glm::mat4 perspectiveMatrix, glm::mat4 cameraMatrix);
@@ -31,5 +38,10 @@ public:
 	GLuint getTexture() { return texture; }
 	glm::vec3 getLightPos() { return lightPos; }
 	glm::vec3 getLightPos2() { return lightPos2; }
+	//void setTranslation(glm::vec3 translation);
+	//glm::vec3 getTranslation() { return translation; }
+	//void setSize(glm::vec3 size);
+	//glm::vec3 getSize() { return size; }
+	//PxRigidDynamic* getBody() { return body; }
 };
 

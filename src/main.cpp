@@ -20,6 +20,24 @@
 #include "Ufo.h"
 #include "ParticleEffect.h"
 #include <memory>
+#include "Physics.h"
+#include "Object.h"
+
+std::vector<Object*> renderables;
+
+/// SCENE
+Physics scene(0 /* gravity (m/s^2) */);
+const double physicsStepTime = 1.f / 60.f;
+double physicsTimeToProcess = 0;
+/// SCENE
+
+/// PHYSICS SHIP
+Ship ship;
+PxRigidDynamic* shipBody = nullptr;
+PxMaterial* shipMaterial = nullptr;
+float F_front = 0.0f;
+float F_side = 0.0f;
+/// PHYSICS SHIP
 
 GLuint programParticle;
 GLuint programSkybox;
@@ -91,7 +109,6 @@ glm::vec3 neptune2Translate = glm::vec3(0.0f);
 glm::vec3 moonTranslate = glm::vec3(0.0f);
 glm::vec3 moon2Translate = glm::vec3(0.0f);
 
-
 GLuint textureId;
 
 glm::vec3 wspolrzedne[400];
@@ -119,6 +136,55 @@ float appLoadingTime;
 
 ParticleEffect* effect;
 
+
+void initPhysicsScene()
+{
+	glm::vec3 t = cameraPos + cameraDir * 0.5f;
+	shipBody = scene.physics->createRigidDynamic(PxTransform(0,0,0));
+	shipMaterial = scene.physics->createMaterial(1, 1, 0.6);
+	//PxShape* shipShape = pxScene.physics->createShape(PxBoxGeometry(7, 5, 2.3f), *shipMaterial);
+	PxShape* shipShape = scene.physics->createShape(PxBoxGeometry(1, 1, 1), *shipMaterial);
+	shipBody->attachShape(*shipShape);
+	shipShape->release();
+	//shipBody->setActorFlag(PxActorFlag::eDISABLE_GRAVITY, true);
+	shipBody->userData = &ship.getMatrix();
+	scene.scene->addActor(*shipBody);
+}
+
+void updateTransforms()
+{
+	// Here we retrieve the current transforms of the objects from the physical simulation.
+	auto actorFlags = PxActorTypeFlag::eRIGID_DYNAMIC | PxActorTypeFlag::eRIGID_STATIC;
+	PxU32 nbActors = scene.scene->getNbActors(actorFlags);
+	if (nbActors)
+	{
+		std::vector<PxRigidActor*> actors(nbActors);
+		scene.scene->getActors(actorFlags, (PxActor**)&actors[0], nbActors);
+		for (auto actor : actors)
+		{
+			// We use the userData of the objects to set up the model matrices
+			// of proper renderables.
+			if (!actor->userData) continue;
+			glm::mat4* modelMatrix = (glm::mat4*)actor->userData;
+
+			// get world matrix of the object (actor)
+			PxMat44 transform = actor->getGlobalPose();
+			std::cout << glm::to_string(glm::vec3(actor->getGlobalPose().p.x, actor->getGlobalPose().p.y, actor->getGlobalPose().p.z)) << std::endl;
+			auto& c0 = transform.column0;
+			auto& c1 = transform.column1;
+			auto& c2 = transform.column2;
+			auto& c3 = transform.column3;
+
+			// set up the model matrix used for the rendering
+			*modelMatrix = glm::mat4(
+				c0.x, c0.y, c0.z, c0.w,
+				c1.x, c1.y, c1.z, c1.w,
+				c2.x, c2.y, c2.z, c2.w,
+				c3.x, c3.y, c3.z, c3.w);
+		}
+	}
+}
+
 void keyboard(unsigned char key, int x, int y)
 {
 	
@@ -129,10 +195,10 @@ void keyboard(unsigned char key, int x, int y)
 	{
 	case 'z': roznicaZ = -20.0f; break;
 	case 'x': roznicaZ = 20.0f; break;
-	case 'w': cameraPos += cameraDir * moveSpeed; break;
-	case 's': cameraPos -= cameraDir * moveSpeed; break;
-	case 'd': cameraPos += cameraSide * moveSpeed; break;
-	case 'a': cameraPos -= cameraSide * moveSpeed; break;
+	case 'w': F_front += 10; break;
+	case 's': F_front -= 10; break;
+	case 'd': F_side -= 5; break;
+	case 'a': F_side += 5; break;
 	case 'm': shipAngle += glm::radians(2.0f); break;
 	case 'f': freeLook = !freeLook; lastRotation = rotation; break;
 	}
@@ -221,7 +287,7 @@ glm::vec3 predictMove() {
 }
 
 
-glm::mat4 createCameraMatrix()
+/*glm::mat4 createCameraMatrix()
 {
 	glm::quat Xangle = glm::angleAxis(glm::radians(roznicaX * 1.f), glm::vec3(0.0f, 1.0f, 0.0f));
 	glm::quat Yangle = glm::angleAxis(glm::radians(roznicaY * 1.f), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -236,6 +302,31 @@ glm::mat4 createCameraMatrix()
 	cameraSide = glm::inverse(rotation) * glm::vec3(1.0f, 0.0f, 0.0f);
 
 	return Core::createViewMatrixQuat(cameraPos, rotation);
+}*/
+
+glm::mat4 createCameraMatrix()
+{
+	PxTransform pxtr = shipBody->getGlobalPose();
+	glm::quat pxtq = glm::quat(pxtr.q.w, pxtr.q.x, pxtr.q.y, pxtr.q.z);
+	glm::vec3 cameraDirMat = pxtq * glm::vec3(0, 0, 1);
+	glm::vec3 offset = cameraDirMat * 2.0f;
+	cameraPos = offset + glm::vec3(pxtr.p.x, pxtr.p.y, pxtr.p.z);
+
+
+	/*glUseProgram(programTexture);
+	glUniform3f(glGetUniformLocation(programTexture, "viewPos"), pxtr.p.x, pxtr.p.y + 3, pxtr.p.z + 8);
+	glUseProgram(0);*/
+
+	glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+	glm::vec3 cameraTarget = glm::vec3(pxtr.p.x, pxtr.p.y, pxtr.p.z);
+	glm::vec3 cameraDirection = glm::normalize(cameraPos - cameraTarget);
+
+	cameraDir = cameraDirection;
+
+	glm::mat4 returnowaTablica = glm::lookAt(cameraPos, cameraPos - cameraDirection, cameraUp);
+
+	return glm::translate(glm::vec3(0, -1, 0)) * returnowaTablica;
 }
 
 void createObjects() {
@@ -256,40 +347,60 @@ void createObjects() {
 		wspolrzedne[i] = glm::vec3(asteroid2D.x + sunPos2.x, rand() % 50 - 50 + sunPos2.y, asteroid2D.y + sunPos2.z);
 	}
 
-	std::shared_ptr<Ship>  ship = Ship::create(programColor, &shipModel, sunPos, sunPos2, glm::vec3(0.6f));
+	ship = Ship(programColor, &shipModel, sunPos, sunPos2, glm::vec3(0.6f));
+	ship.setMatrix(glm::translate(glm::vec3(0.0f))*glm::rotate(shipAngle,glm::vec3(0,1,0))*glm::scale(glm::vec3(0.0008f)));
 
 	std::shared_ptr<Ufo> ufo = Ufo::create(programUfo, &ufoModel, planetDefaultMatrix, textureUfo, sunPos, sunPos2);
+	//renderables.emplace_back(ufo);
 
 	std::shared_ptr<Sun> sun1 = Sun::create(programSun, &sphereModel, glm::translate(sunPos) * glm::scale(glm::vec3(8 * 14.0f)),sunPos,sunPos2,textureSun);
+	//renderables.emplace_back(sun1);
 	std::shared_ptr<Sun> sun2 = Sun::create(programSun, &sphereModel, glm::translate(sunPos2) * glm::scale(glm::vec3(8 * 14.0f)), sunPos, sunPos2, textureSun);
-
+	//renderables.emplace_back(sun2);
 
 	for (int i = 0; i < 280; i++) {
 		std::shared_ptr<Asteroid> asteroid = Asteroid::create(programBump, &sphereModel, glm::translate(wspolrzedne[i]), textureAsteroid, sunPos, sunPos2);
 		asteroid->setNormal(textureAsteroid_normals);
+		//renderables.emplace_back(asteroid);
 	}
 
 	std::shared_ptr<Planet> mercury = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureMercury, sunPos, sunPos2);
+	//renderables.emplace_back(mercury);
 	std::shared_ptr<Planet> venus = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureVenus, sunPos, sunPos2);
+	//renderables.emplace_back(venus);
 	std::shared_ptr<Planet> earth = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureEarth, sunPos, sunPos2);
+	//renderables.emplace_back(earth);
 	std::shared_ptr<Planet> mars = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureMars, sunPos, sunPos2);
+	//renderables.emplace_back(mars);
 	std::shared_ptr<Planet> jupiter = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureJupiter, sunPos, sunPos2);
+	//renderables.emplace_back(jupiter);
 	std::shared_ptr<Planet> saturn = Planet::create(programTexture, &saturnModel, planetDefaultMatrix, textureSaturn, sunPos, sunPos2);
+	//renderables.emplace_back(saturn);
 	std::shared_ptr<Planet> uranus = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureUranus, sunPos, sunPos2);
+	//renderables.emplace_back(uranus);
 	std::shared_ptr<Planet> neptune = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureNeptune, sunPos, sunPos2);
+	//renderables.emplace_back(neptune);
 
 	std::shared_ptr<Planet> mercury2 = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureMercury, sunPos, sunPos2);
+	//renderables.emplace_back(mercury2);
 	std::shared_ptr<Planet> venus2 = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureVenus, sunPos, sunPos2);
+	//renderables.emplace_back(venus2);
 	std::shared_ptr<Planet> earth2 = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureEarth, sunPos, sunPos2);
+	//renderables.emplace_back(earth2);
 	std::shared_ptr<Planet> mars2 = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureMars, sunPos, sunPos2);
+	//renderables.emplace_back(mars2);
 	std::shared_ptr<Planet> jupiter2 = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureJupiter, sunPos, sunPos2);
+	//renderables.emplace_back(jupiter2);
 	std::shared_ptr<Planet> saturn2 = Planet::create(programTexture, &saturnModel, planetDefaultMatrix, textureSaturn, sunPos, sunPos2);
+	//renderables.emplace_back(saturn2);
 	std::shared_ptr<Planet> uranus2 = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureUranus, sunPos, sunPos2);
+	//renderables.emplace_back(uranus2);
 	std::shared_ptr<Planet> neptune2 = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureNeptune, sunPos, sunPos2);
+	//renderables.emplace_back(neptune2);
 	std::shared_ptr<Planet> moon = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureMercury, sunPos, sunPos2);
+	//renderables.emplace_back(moon);
 	std::shared_ptr<Planet> moon2 = Planet::create(programTexture, &sphereModel, planetDefaultMatrix, textureMercury, sunPos, sunPos2);
-
-
+	//renderables.emplace_back(moon2);
 
 	std::shared_ptr<Planet> gunSight1 = Planet::create(programSight, &planeModel, sightDefaultMatrix, sunPos, sunPos2);
 	std::shared_ptr<Planet> gunSight2 = Planet::create(programSight, &planeModel, sightDefaultMatrix, sunPos, sunPos2);
@@ -297,10 +408,8 @@ void createObjects() {
 
 void drawObjects() {
 	float timeF = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
-	cameraMatrix = createCameraMatrix();
-	perspectiveMatrix = Core::createPerspectiveMatrix(frustumScale);
 
-	glm::mat4 shipModelMatrix;
+	/*glm::mat4 shipModelMatrix;
 	glm::mat4 shipInitialTransformation;
 	if (!mouseKeyDown) {
 		shipInitialTransformation = glm::translate(glm::vec3(0, -0.25f, 0)) * glm::rotate(shipAngle, glm::vec3(0, 1, 0)) * glm::scale(glm::vec3(0.0008f));
@@ -314,14 +423,14 @@ void drawObjects() {
 	else {
 		
 		shipModelMatrix = glm::translate(cameraPos + cameraDir * 0.5f) * glm::mat4_cast(glm::inverse(rotation)) * shipInitialTransformation;
-	}
-	glm::mat4 planetRotation = glm::rotate(3.14f / 2.f * timeF / 2, glm::vec3(0.0f, 1.0f, 0.0f));
+	}*/
 
-	int ctr = 0;
-	for (auto obj : Ship::ship_objects) {
-		obj->setMatrix(shipModelMatrix);
-		obj->draw(obj->getColor(), cameraPos, perspectiveMatrix, cameraMatrix);
-	}
+	// ship
+	//ship.setMatrix(shipModelMatrix);
+	//shipBody->userData = &ship.getMatrix();
+	ship.draw(ship.getColor(), cameraPos, perspectiveMatrix, cameraMatrix);
+	//
+
 	for (auto obj : Ufo::ufo_objects) {
 		obj->setMatrix(glm::translate(predictMove()) * glm::scale(glm::vec3(4.0f)));
 		obj->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);
@@ -332,6 +441,7 @@ void drawObjects() {
 	for (auto obj : Asteroid::asteroid_objects) {
 		obj->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);
 	}
+	glm::mat4 planetRotation = glm::rotate(3.14f / 2.f * timeF / 2, glm::vec3(0.0f, 1.0f, 0.0f));
 	for (auto obj : Planet::planet_objects) {
 		if (counter == 0) {
 			mercuryTranslate = glm::vec3(sunPos.x + 170.0f * sinf(timeF / 8), sunPos.y, sunPos.z + 170.0f * cosf(timeF / 8));
@@ -419,7 +529,7 @@ void drawObjects() {
 	counter = 0;
 	if (effect) {
 		if (effect->isActive()) {
-			effect->sendProjectionToShader(perspectiveMatrix, cameraMatrix,shipModelMatrix);
+			effect->sendProjectionToShader(perspectiveMatrix, cameraMatrix, ship.getMatrix());
 			effect->simulate();
 		}
 	}
@@ -427,8 +537,33 @@ void drawObjects() {
 
 void renderScene()
 {
+	double time = glutGet(GLUT_ELAPSED_TIME) / 1000.0;
+	static double prevTime = time;
+	double dtime = time - prevTime;
+	prevTime = time;
+
+	// Update physics
+	if (dtime < 1.f) {
+		physicsTimeToProcess += dtime;
+		while (physicsTimeToProcess > 0) {
+			// here we perform the physics simulation step
+			scene.step(physicsStepTime);
+			physicsTimeToProcess -= physicsStepTime;
+		}
+	}
+	//shipBody->setAngularVelocity();
+	shipBody->setLinearVelocity(PxVec3(0, 0, 0));
+	PxRigidBodyExt::addLocalForceAtLocalPos(*shipBody, PxVec3(F_side, 0, 0), PxVec3(0, 0, 0));
+	PxRigidBodyExt::addLocalForceAtLocalPos(*shipBody, PxVec3(0, 0, F_front), PxVec3(0, 0, 0));
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.1f, 0.3f, 1.0f);
+
+	cameraMatrix = createCameraMatrix();
+	perspectiveMatrix = Core::createPerspectiveMatrix(frustumScale);
+
+	updateTransforms();
+
 	Skybox::renderSkybox(programSkybox, cameraMatrix, perspectiveMatrix);
 	drawObjects();
 	glutSwapBuffers();
@@ -438,7 +573,7 @@ void init()
 {
 	srand(time(0));
 	glEnable(GL_DEPTH_TEST);
-
+	
 	programColor = shaderLoader.CreateProgram("shaders/shader_color.vert", "shaders/shader_color.frag");
 	programTexture = shaderLoader.CreateProgram("shaders/shader_tex.vert", "shaders/shader_tex.frag");
 	programSun = shaderLoader.CreateProgram("shaders/shader_sun.vert", "shaders/shader_sun.frag");
@@ -471,9 +606,10 @@ void init()
 
 	Skybox::initSkybox();
 	createObjects();
+	initPhysicsScene();
+
 	appLoadingTime = glutGet(GLUT_ELAPSED_TIME)/1000.0f;
 
-	
 }
 
 void onReshape(int width, int height)
@@ -487,8 +623,12 @@ void shutdown()
 {
 	shaderLoader.DeleteProgram(programColor);
 	shaderLoader.DeleteProgram(programTexture);
-	shaderLoader.DeleteProgram(programSkybox);
 	shaderLoader.DeleteProgram(programSun);
+	shaderLoader.DeleteProgram(programSight);
+	shaderLoader.DeleteProgram(programBump);
+	shaderLoader.DeleteProgram(programSkybox);
+	shaderLoader.DeleteProgram(programUfo);
+	shaderLoader.DeleteProgram(programParticle);
 }
 
 void idle()

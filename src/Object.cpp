@@ -36,3 +36,13 @@ void Object::drawTexture(glm::vec3 cameraPos, glm::mat4 perspectiveMatrix, glm::
 	Core::DrawModel(this->getModel());
 	glUseProgram(0);
 }
+
+/*void Object::setTranslation(glm::vec3 translation)
+{
+	this->translation = translation;
+}
+
+void Object::setSize(glm::vec3 size)
+{
+	this->size = size;
+}*/

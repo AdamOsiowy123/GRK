@@ -6,6 +6,29 @@ Asteroid::Asteroid() {
 
 }
 
+/*Asteroid::Asteroid(GLuint program, obj::Model* model, glm::mat4 matrix, GLuint texture, glm::vec3 lightPos, glm::vec3 lightPos2, Physics* scene)
+{
+	this->program = program;
+	this->model = model;
+	this->matrix = matrix;
+	this->texture = texture;
+	this->lightPos = lightPos;
+	this->lightPos2 = lightPos2;
+	
+	this->scene = scene;
+
+	glm::vec3 tmp = this->getTranslation();
+	this->body = this->scene->physics->createRigidDynamic(PxTransform(tmp.x,tmp.y,tmp.z));
+	this->material = this->scene->physics->createMaterial(0.5f, 0.5f, 0.6f);
+	this->shape = this->scene->physics->createShape(PxSphereGeometry(1), *this->material);
+	this->body->attachShape(*this->shape);
+	this->shape->release();
+	this->body->setLinearVelocity(PxVec3(-3, 2, -50));
+	this->body->userData = &this->getMatrix(); // sprawdziæ !!!
+	std::cout << &this->body << std::endl;
+	this->scene->scene->addActor(*this->body); // sprawdziæ !!!
+}*/
+
 Asteroid::Asteroid(GLuint program, obj::Model* model, glm::mat4 matrix, GLuint texture, glm::vec3 lightPos, glm::vec3 lightPos2)
 {
 	this->program = program;
@@ -23,9 +46,16 @@ std::shared_ptr<Asteroid> Asteroid::create()
 	return asteroid;
 }
 
+/*std::shared_ptr<Asteroid> Asteroid::create(GLuint program, obj::Model* model, glm::mat4 matrix, GLuint texture, glm::vec3 lightPos, glm::vec3 lightPos2, Physics* scene)
+{
+	shared_ptr<Asteroid> asteroid = shared_ptr<Asteroid>(new Asteroid(program,model,matrix,texture,lightPos,lightPos2, scene));
+	asteroid_objects.push_back(asteroid);
+	return asteroid;
+}*/
+
 std::shared_ptr<Asteroid> Asteroid::create(GLuint program, obj::Model* model, glm::mat4 matrix, GLuint texture, glm::vec3 lightPos, glm::vec3 lightPos2)
 {
-	shared_ptr<Asteroid> asteroid = shared_ptr<Asteroid>(new Asteroid(program,model,matrix,texture,lightPos,lightPos2));
+	shared_ptr<Asteroid> asteroid = shared_ptr<Asteroid>(new Asteroid(program, model, matrix, texture, lightPos, lightPos2));
 	asteroid_objects.push_back(asteroid);
 	return asteroid;
 }
