@@ -31,6 +31,10 @@ float F_front = 0.0f;
 float F_side = 0.0f;
 float F_qe = 0.0f;
 float F_zc = 0.0f;
+
+Ship* rocket;
+PxRigidDynamic* rocketBody = nullptr;
+PxMaterial* rocketMaterial = nullptr;
 /// PHYSICS SHIP
 
 /// PHYSICS ASTEROIDs
@@ -108,13 +112,14 @@ obj::Model sphereModel;
 obj::Model saturnModel;
 obj::Model planeModel;
 obj::Model ufoModel;
+obj::Model rocketModel;
 
 glm::vec3 cameraPos;
 glm::vec3 cameraDir; // Wektor "do przodu" kamery
 glm::vec3 cameraSide; // Wektor "w bok" kamery
 float cameraAngle = 0;
 
-glm::mat4 cameraMatrix, perspectiveMatrix;
+glm::mat4 cameraMatrix, perspectiveMatrix, rocketMatrix;
 
 glm::vec3 lightDir = glm::normalize(glm::vec3(1.0f, -0.9f, -1.0f));
 
@@ -720,6 +725,9 @@ void createObjects() {
 
 	ufo = new Ufo(programUfo, &ufoModel, glm::translate(glm::vec3(0.0f)), textureUfo, sunPos, sunPos2);
 
+	rocket = new Ship(programColor, &rocketModel, sunPos, sunPos2, glm::vec3(0.6f));
+	rocket->setMatrix(glm::translate(glm::vec3(0, 200, 0)));
+
 	sun1 = new Sun(programSun, &sphereModel, glm::translate(sunPos) * glm::scale(glm::vec3(8 * 14.0f)),sunPos,sunPos2,textureSun);
 	sun2 = new Sun(programSun, &sphereModel, glm::translate(sunPos2) * glm::scale(glm::vec3(8 * 14.0f)), sunPos, sunPos2, textureSun);
 
@@ -762,6 +770,12 @@ void drawObjects() {
 	ship->setMatrix(ship->getMatrix() * glm::rotate(shipAngle, glm::vec3(0, 1, 0)) * glm::scale(glm::vec3(0.0008f)));
 	ship->draw(ship->getColor(), cameraPos, perspectiveMatrix, cameraMatrix);
 	//
+
+	rocketMatrix = ship->getMatrix();
+	rocketMatrix[3][1] -= 0.1f;
+	rocketMatrix = rocketMatrix * glm::scale(glm::vec3(0.3f));
+	rocket->setMatrix(rocketMatrix);
+	rocket->draw(rocket->getColor(), cameraPos, perspectiveMatrix, cameraMatrix);
 
 	ufo->setMatrix(glm::translate(predictMove()) * glm::scale(glm::vec3(4.0f)));
 	//ufo->setMatrix(glm::translate(glm::vec3(300,0,250)) * glm::scale(glm::vec3(4.0f)));
@@ -985,6 +999,7 @@ void init()
 	planeModel = obj::loadModelFromFile("models/plane.obj");
 	saturnModel = obj::loadModelFromFile("models/saturn.obj");
 	ufoModel = obj::loadModelFromFile("models/ufo.obj");
+	rocketModel = obj::loadModelFromFile("models/rocket.obj");
 
 	textureAsteroid = Core::LoadTexture("textures/asteroid.png");
 	textureAsteroid_normals = Core::LoadTexture("textures/asteroid_normals.png");
