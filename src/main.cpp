@@ -1029,7 +1029,13 @@ void onReshape(int width, int height)
 	frustumScale = (float)width / height;
 	swidth = width;
 	sheight = height;
-	glViewport(0, 0, width, height);
+	int w = width;
+	int h = height;
+	if (width > height)
+		h = height * frustumScale;
+	if (height > width)
+		w = width * frustumScale;
+	glViewport(0, 0, w, h);
 }
 
 void shutdown()
