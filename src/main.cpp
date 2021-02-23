@@ -93,6 +93,11 @@ PxRigidDynamic* moonBody2;
 PxMaterial* planetMaterial = nullptr;
 /// PHYSICS PLANETs
 
+/// PHYSICS UFO
+Ufo* ufo;
+PxRigidDynamic* ufoBody = nullptr;
+PxMaterial* ufoMaterial = nullptr;
+/// PHYSICS UFO
 GLuint programParticle;
 GLuint programSkybox;
 GLuint programColor;
@@ -373,6 +378,15 @@ void initPhysicsScene()
 	moonBody2->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
 	moonBody2->userData = moon2;
 	scene.scene->addActor(*moonBody2);
+
+	ufoBody = scene.physics->createRigidDynamic(PxTransform(0,0,0));
+	ufoMaterial = scene.physics->createMaterial(1, 1, 0.6);
+	PxShape* ufoShape = scene.physics->createShape(PxSphereGeometry(5.5), *ufoMaterial);
+	ufoBody->attachShape(*ufoShape);
+	ufoShape->release();
+	ufoBody->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
+	ufoBody->userData = ufo;
+	scene.scene->addActor(*ufoBody);
 }
 
 void updateTransforms()
@@ -445,8 +459,8 @@ void keyboard(unsigned char key, int x, int y)
 	{
 	case 'w': F_front -= 25; break;
 	case 's': F_front += 25; break;
-	case 'd': F_side += 5; break;
-	case 'a': F_side -= 5; break;
+	case 'd': F_side += 5.0f; break;
+	case 'a': F_side -= 5.0f; break;
 	case 'q': F_qe -= 15; break;
 	case 'e': F_qe += 15; break;
 	case 'z': F_zc += 5; break;
@@ -487,6 +501,8 @@ void loadParticleTextures() {
 }
 
 void lowerForces() {
+	F_side = round(F_side * 100.0f) / 100.0f;
+	F_zc = round(F_zc * 100.0f) / 100.0f;
 	if (F_front > 0) {
 		F_front -= 0.5f;
 	}
@@ -496,12 +512,12 @@ void lowerForces() {
 		F_front += 0.5f;
 	}
 	if (F_side > 0) {
-		F_side -= 0.05f;
+		F_side -= 0.1f;
 	}
 	else if (F_side == 0) {
 	}
-	else {
-		F_side += 0.05f;
+	else if (F_side < 0) {
+		F_side += 0.1f;
 	}
 	if (F_qe > 0) {
 		F_qe -= 0.5f;
@@ -519,6 +535,7 @@ void lowerForces() {
 	else {
 		F_zc += 0.05f;
 	}
+	std::cout << F_zc << endl;
 }
 
 glm::vec3 predictMove() {
@@ -648,8 +665,7 @@ void createObjects() {
 	ship = new Ship(programColor, &shipModel, sunPos, sunPos2, glm::vec3(0.6f));
 	ship->setMatrix(glm::rotate(shipAngle,glm::vec3(0,1,0))*glm::scale(glm::vec3(0.0008f)));
 
-	std::shared_ptr<Ufo> ufo = Ufo::create(programUfo, &ufoModel, planetDefaultMatrix, textureUfo, sunPos, sunPos2);
-	//renderables.emplace_back(ufo);
+	ufo = new Ufo(programUfo, &ufoModel, glm::translate(glm::vec3(0.0f)), textureUfo, sunPos, sunPos2);
 
 	sun1 = new Sun(programSun, &sphereModel, glm::translate(sunPos) * glm::scale(glm::vec3(8 * 14.0f)),sunPos,sunPos2,textureSun);
 	sun2 = new Sun(programSun, &sphereModel, glm::translate(sunPos2) * glm::scale(glm::vec3(8 * 14.0f)), sunPos, sunPos2, textureSun);
@@ -682,9 +698,6 @@ void createObjects() {
 
 	moon = new Planet(programTexture, &sphereModel, glm::translate(moonTranslate), textureMercury, sunPos, sunPos2);
 	moon2 = new Planet(programTexture, &sphereModel, glm::translate(moon2Translate), textureMercury, sunPos, sunPos2);
-
-	std::shared_ptr<Planet> gunSight1 = Planet::create(programSight, &planeModel, sightDefaultMatrix, sunPos, sunPos2);
-	std::shared_ptr<Planet> gunSight2 = Planet::create(programSight, &planeModel, sightDefaultMatrix, sunPos, sunPos2);
 }
 
 void drawObjects() {
@@ -697,10 +710,10 @@ void drawObjects() {
 	ship->draw(ship->getColor(), cameraPos, perspectiveMatrix, cameraMatrix);
 	//
 
-	for (auto obj : Ufo::ufo_objects) {
-		obj->setMatrix(glm::translate(predictMove()) * glm::scale(glm::vec3(4.0f)));
-		obj->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);
-	}
+	ufo->setMatrix(glm::translate(predictMove()) * glm::scale(glm::vec3(4.0f)));
+	//ufo->setMatrix(glm::translate(glm::vec3(300,0,250)) * glm::scale(glm::vec3(4.0f)));
+	ufoBody->setKinematicTarget(PxTransform(ufo->getMatrix()[3][0], ufo->getMatrix()[3][1], ufo->getMatrix()[3][2]));
+	ufo->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);
 	
 	sun1->setMatrix(sun1->getMatrix() * glm::scale(glm::vec3(8 * 14.0f)));
 	sun1->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);
