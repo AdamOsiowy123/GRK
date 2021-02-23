@@ -31,10 +31,6 @@ float F_front = 0.0f;
 float F_side = 0.0f;
 float F_qe = 0.0f;
 float F_zc = 0.0f;
-
-Ship* rocket;
-PxRigidDynamic* rocketBody = nullptr;
-PxMaterial* rocketMaterial = nullptr;
 /// PHYSICS SHIP
 
 /// PHYSICS ASTEROIDs
@@ -112,14 +108,13 @@ obj::Model sphereModel;
 obj::Model saturnModel;
 obj::Model planeModel;
 obj::Model ufoModel;
-obj::Model rocketModel;
 
 glm::vec3 cameraPos;
 glm::vec3 cameraDir; // Wektor "do przodu" kamery
 glm::vec3 cameraSide; // Wektor "w bok" kamery
 float cameraAngle = 0;
 
-glm::mat4 cameraMatrix, perspectiveMatrix, rocketMatrix;
+glm::mat4 cameraMatrix, perspectiveMatrix;
 
 glm::vec3 lightDir = glm::normalize(glm::vec3(1.0f, -0.9f, -1.0f));
 
@@ -130,8 +125,6 @@ glm::vec3 sunColor = glm::vec3(1.0f, 0.5f, 0.2f);
 glm::quat rotation = glm::quat(0, 0, 0, 0);
 float shipAngle = glm::radians(180.0f);
 float frustumScale = 1.0f;
-
-glm::vec3 collisionCoords;
 
 GLuint textureAsteroid;
 GLuint textureAsteroid_normals;
@@ -184,7 +177,6 @@ int counter = 0;
 float lastTimeF = -1.0f;
 glm::quat lastRotation;
 glm::mat4 lastCameraMatrix;
-glm::mat4 particleMatrix;
 
 bool mouseKeyDown = false;
 bool freeLook = false;
@@ -222,14 +214,6 @@ public:
 			for (PxU32 j = 0; j < cp.extractContacts(v, sizeof(v)); j++) {
 				std::cout << "QQQQQQQQQQQ" << std::endl;
 				std::cout << "x:" << v[j].position.x << " y:" << v[j].position.y << " z:" << v[j].position.z << std::endl;
-				collisionCoords.x = v[j].position.x + 8.f;
-				collisionCoords.y = v[j].position.y - 15.0f;
-				collisionCoords.z = v[j].position.z + 3.f;
-				particleMatrix = ship->getMatrix();
-				particleMatrix[3][0] = collisionCoords.x;
-				particleMatrix[3][1] = collisionCoords.y;
-				particleMatrix[3][2] = collisionCoords.z;
-				effect = new ParticleEffect(programParticle, 1, 0.0015625f, textureParticle, glm::vec3(0, 0, 0), glm::vec3((rand() % 10 - 5) * 100.0f, (rand() % 10 - 5) * 100.0f, 0.0f));
 				std::cout << pairHeader.actors[0] << "  " << pairHeader.actors[1] << std::endl;
 				std::cout << "QQQQQQQQQQQ" << std::endl;
 			}
@@ -511,6 +495,7 @@ void text(int x, int y, std::string text, int rozmiar)
 void keyboard(unsigned char key, int x, int y)
 {
 	float angleSpeed = 0.1f;
+	//float moveSpeed = 0.1f;
 	float moveSpeed = 10.0f;
 	switch(key)
 	{
@@ -550,8 +535,8 @@ void mouseClick(int button, int state, int x, int y) {
 		}
 	}
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
-		effect = new ParticleEffect(programParticle, 1, 0.0015625f, textureParticle, glm::vec3(0,0,0), glm::vec3(0,0,0));
-
+		effect = new ParticleEffect(programParticle, 1, 0.0015625f, textureParticle, glm::vec3(300,2,280), glm::vec3((rand() % 10 - 5) * 100.0f, (rand() % 10 - 5) * 100.0f, 0.0f));
+		std::cout << glm::to_string(effect->getPosition()) << std::endl;
 	}
 }
 
@@ -725,9 +710,6 @@ void createObjects() {
 
 	ufo = new Ufo(programUfo, &ufoModel, glm::translate(glm::vec3(0.0f)), textureUfo, sunPos, sunPos2);
 
-	rocket = new Ship(programColor, &rocketModel, sunPos, sunPos2, glm::vec3(0.6f));
-	rocket->setMatrix(glm::translate(glm::vec3(0, 200, 0)));
-
 	sun1 = new Sun(programSun, &sphereModel, glm::translate(sunPos) * glm::scale(glm::vec3(8 * 14.0f)),sunPos,sunPos2,textureSun);
 	sun2 = new Sun(programSun, &sphereModel, glm::translate(sunPos2) * glm::scale(glm::vec3(8 * 14.0f)), sunPos, sunPos2, textureSun);
 
@@ -770,12 +752,6 @@ void drawObjects() {
 	ship->setMatrix(ship->getMatrix() * glm::rotate(shipAngle, glm::vec3(0, 1, 0)) * glm::scale(glm::vec3(0.0008f)));
 	ship->draw(ship->getColor(), cameraPos, perspectiveMatrix, cameraMatrix);
 	//
-
-	rocketMatrix = ship->getMatrix();
-	rocketMatrix[3][1] -= 0.1f;
-	rocketMatrix = rocketMatrix * glm::scale(glm::vec3(0.3f));
-	rocket->setMatrix(rocketMatrix);
-	rocket->draw(rocket->getColor(), cameraPos, perspectiveMatrix, cameraMatrix);
 
 	ufo->setMatrix(glm::translate(predictMove()) * glm::scale(glm::vec3(4.0f)));
 	//ufo->setMatrix(glm::translate(glm::vec3(300,0,250)) * glm::scale(glm::vec3(4.0f)));
@@ -929,7 +905,7 @@ void drawObjects() {
 	//particle effect
 	if (effect) {
 		if (effect->isActive()) {
-			effect->sendProjectionToShader(perspectiveMatrix, cameraMatrix, particleMatrix);
+			effect->sendProjectionToShader(perspectiveMatrix, cameraMatrix, ship->getMatrix());
 			effect->simulate();
 		}
 	}
@@ -999,7 +975,6 @@ void init()
 	planeModel = obj::loadModelFromFile("models/plane.obj");
 	saturnModel = obj::loadModelFromFile("models/saturn.obj");
 	ufoModel = obj::loadModelFromFile("models/ufo.obj");
-	rocketModel = obj::loadModelFromFile("models/rocket.obj");
 
 	textureAsteroid = Core::LoadTexture("textures/asteroid.png");
 	textureAsteroid_normals = Core::LoadTexture("textures/asteroid_normals.png");
@@ -1029,7 +1004,13 @@ void onReshape(int width, int height)
 	frustumScale = (float)width / height;
 	swidth = width;
 	sheight = height;
-	glViewport(0, 0, width, height);
+	int w = width;
+	int h = height;
+	if (width > height)
+		h = height * frustumScale;
+	if (height > width)
+		w = width * frustumScale;
+	glViewport(0, 0, w, h);
 }
 
 void shutdown()
