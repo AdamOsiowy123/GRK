@@ -132,6 +132,11 @@ bool ParticleEffect::isActive()
     return this->active;
 }
 
+glm::vec3 ParticleEffect::getPosition()
+{
+    return this->position;
+}
+
 GLuint ParticleEffect::selectTexture(float age)
 {   
     int index;

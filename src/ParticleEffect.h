@@ -37,6 +37,7 @@ public:
     void simulate();
     void sendProjectionToShader(glm::mat4 persp, glm::mat4 camera,glm::mat4 shipModelMatrix);
     bool isActive();
+    glm::vec3 getPosition();
 private:
     GLuint shader;
     std::vector<Particle> particles;

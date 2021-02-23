@@ -509,6 +509,7 @@ void keyboard(unsigned char key, int x, int y)
 	case 'c': F_zc -= 5; break;
 	case 'm': shipAngle += glm::radians(2.0f); break;
 	case 'f': freeLook = !freeLook; break;
+	case 'r': F_front = 0; F_side = 0; F_zc = 0; F_qe = 0; break;
 	}
 }
 
@@ -534,7 +535,8 @@ void mouseClick(int button, int state, int x, int y) {
 		}
 	}
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
-		effect = new ParticleEffect(programParticle, 1, 0.0015625f, textureParticle, glm::vec3(-170.0f,0.0f,600.0f), glm::vec3((rand() % 10 - 5) * 100.0f, (rand() % 10 - 5) * 100.0f, 0.0f));
+		effect = new ParticleEffect(programParticle, 1, 0.0015625f, textureParticle, glm::vec3(300,2,280), glm::vec3((rand() % 10 - 5) * 100.0f, (rand() % 10 - 5) * 100.0f, 0.0f));
+		std::cout << glm::to_string(effect->getPosition()) << std::endl;
 	}
 }
 
