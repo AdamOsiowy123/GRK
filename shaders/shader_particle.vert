@@ -12,5 +12,5 @@ void main()
 {
 	float scale = 500.0f;
     TexCoords = vertex.xyz;
-    gl_Position = cameraProjectionMatrix * shipModelMatrix * vec4((vertex.xyz * scale) + particlePosition, 1.0);
+    gl_Position = cameraProjectionMatrix * shipModelMatrix * vec4((vertex.xyz * scale * 50.0f) + particlePosition, 1.0);
 }

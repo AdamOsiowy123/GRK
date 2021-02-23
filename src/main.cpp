@@ -126,6 +126,8 @@ glm::quat rotation = glm::quat(0, 0, 0, 0);
 float shipAngle = glm::radians(180.0f);
 float frustumScale = 1.0f;
 
+glm::vec3 collisionCoords;
+
 GLuint textureAsteroid;
 GLuint textureAsteroid_normals;
 GLuint textureJupiter;
@@ -177,6 +179,7 @@ int counter = 0;
 float lastTimeF = -1.0f;
 glm::quat lastRotation;
 glm::mat4 lastCameraMatrix;
+glm::mat4 particleMatrix;
 
 bool mouseKeyDown = false;
 bool freeLook = false;
@@ -214,6 +217,14 @@ public:
 			for (PxU32 j = 0; j < cp.extractContacts(v, sizeof(v)); j++) {
 				std::cout << "QQQQQQQQQQQ" << std::endl;
 				std::cout << "x:" << v[j].position.x << " y:" << v[j].position.y << " z:" << v[j].position.z << std::endl;
+				collisionCoords.x = v[j].position.x + 8.f;
+				collisionCoords.y = v[j].position.y - 15.0f;
+				collisionCoords.z = v[j].position.z + 3.f;
+				particleMatrix = ship->getMatrix();
+				particleMatrix[3][0] = collisionCoords.x;
+				particleMatrix[3][1] = collisionCoords.y;
+				particleMatrix[3][2] = collisionCoords.z;
+				effect = new ParticleEffect(programParticle, 1, 0.0015625f, textureParticle, glm::vec3(0, 0, 0), glm::vec3((rand() % 10 - 5) * 100.0f, (rand() % 10 - 5) * 100.0f, 0.0f));
 				std::cout << pairHeader.actors[0] << "  " << pairHeader.actors[1] << std::endl;
 				std::cout << "QQQQQQQQQQQ" << std::endl;
 			}
@@ -495,7 +506,6 @@ void text(int x, int y, std::string text, int rozmiar)
 void keyboard(unsigned char key, int x, int y)
 {
 	float angleSpeed = 0.1f;
-	//float moveSpeed = 0.1f;
 	float moveSpeed = 10.0f;
 	switch(key)
 	{
@@ -535,8 +545,8 @@ void mouseClick(int button, int state, int x, int y) {
 		}
 	}
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
-		effect = new ParticleEffect(programParticle, 1, 0.0015625f, textureParticle, glm::vec3(300,2,280), glm::vec3((rand() % 10 - 5) * 100.0f, (rand() % 10 - 5) * 100.0f, 0.0f));
-		std::cout << glm::to_string(effect->getPosition()) << std::endl;
+		effect = new ParticleEffect(programParticle, 1, 0.0015625f, textureParticle, glm::vec3(0,0,0), glm::vec3(0,0,0));
+
 	}
 }
 
@@ -905,7 +915,7 @@ void drawObjects() {
 	//particle effect
 	if (effect) {
 		if (effect->isActive()) {
-			effect->sendProjectionToShader(perspectiveMatrix, cameraMatrix, ship->getMatrix());
+			effect->sendProjectionToShader(perspectiveMatrix, cameraMatrix, particleMatrix);
 			effect->simulate();
 		}
 	}
