@@ -443,12 +443,12 @@ void keyboard(unsigned char key, int x, int y)
 	float moveSpeed = 10.0f;
 	switch(key)
 	{
-	case 'w': F_front -= 10; break;
-	case 's': F_front += 10; break;
+	case 'w': F_front -= 25; break;
+	case 's': F_front += 25; break;
 	case 'd': F_side += 5; break;
 	case 'a': F_side -= 5; break;
-	case 'q': F_qe -= 5; break;
-	case 'e': F_qe += 5; break;
+	case 'q': F_qe -= 15; break;
+	case 'e': F_qe += 15; break;
 	case 'z': F_zc += 5; break;
 	case 'c': F_zc -= 5; break;
 	case 'm': shipAngle += glm::radians(2.0f); break;
@@ -484,6 +484,41 @@ void mouseClick(int button, int state, int x, int y) {
 
 void loadParticleTextures() {
 	textureParticle = Core::LoadParticleTextures();
+}
+
+void lowerForces() {
+	if (F_front > 0) {
+		F_front -= 0.5f;
+	}
+	else if (F_front == 0) {
+	}
+	else {
+		F_front += 0.5f;
+	}
+	if (F_side > 0) {
+		F_side -= 0.05f;
+	}
+	else if (F_side == 0) {
+	}
+	else {
+		F_side += 0.05f;
+	}
+	if (F_qe > 0) {
+		F_qe -= 0.5f;
+	}
+	else if (F_qe == 0) {
+	}
+	else {
+		F_qe += 0.5f;
+	}
+	if (F_zc > 0) {
+		F_zc -= 0.05f;
+	}
+	else if (F_zc == 0) {
+	}
+	else {
+		F_zc += 0.05f;
+	}
 }
 
 glm::vec3 predictMove() {
@@ -858,6 +893,7 @@ void renderScene()
 	perspectiveMatrix = Core::createPerspectiveMatrix(frustumScale);
 
 	updateTransforms();
+	lowerForces();
 
 	Skybox::renderSkybox(programSkybox, cameraMatrix, perspectiveMatrix);
 	drawObjects();
