@@ -23,12 +23,6 @@
 #include "Physics.h"
 #include "Object.h"
 
-/// SCENE
-Physics scene(0 /* gravity (m/s^2) */);
-const double physicsStepTime = 1.f / 60.f;
-double physicsTimeToProcess = 0;
-/// SCENE
-
 /// PHYSICS SHIP
 Ship* ship;
 PxRigidDynamic* shipBody = nullptr;
@@ -128,9 +122,6 @@ glm::vec3 sunPos = glm::vec3(0.0f, 0.0f, 0.0f);
 glm::vec3 sunPos2 = glm::vec3(1000.0f, -800.0f, -500.0f);
 glm::vec3 sunColor = glm::vec3(1.0f, 0.5f, 0.2f);
 
-glm::mat4 planetDefaultMatrix = glm::translate(glm::vec3(0.0f));
-glm::mat4 sightDefaultMatrix = glm::translate(glm::vec3(100000.0f));
-
 glm::quat rotation = glm::quat(0, 0, 0, 0);
 float shipAngle = glm::radians(180.0f);
 float frustumScale = 1.0f;
@@ -149,33 +140,33 @@ GLuint textureSun;
 GLuint textureUfo;
 std::vector<GLuint> textureParticle;
 
-glm::vec3 mercuryTranslate = glm::vec3(0.0f);
-glm::vec3 mercury2Translate = glm::vec3(0.0f);
-glm::vec3 venusTranslate = glm::vec3(0.0f);
-glm::vec3 venus2Translate = glm::vec3(0.0f);
-glm::vec3 earthTranslate = glm::vec3(0.0f);
-glm::vec3 earth2Translate = glm::vec3(0.0f);
-glm::vec3 marsTranslate = glm::vec3(0.0f);
-glm::vec3 mars2Translate = glm::vec3(0.0f);
-glm::vec3 jupiterTranslate = glm::vec3(0.0f);
-glm::vec3 jupiter2Translate = glm::vec3(0.0f);
-glm::vec3 saturnTranslate = glm::vec3(0.0f);
-glm::vec3 saturn2Translate = glm::vec3(0.0f);
-glm::vec3 uranusTranslate = glm::vec3(0.0f);
-glm::vec3 uranus2Translate = glm::vec3(0.0f);
-glm::vec3 neptuneTranslate = glm::vec3(0.0f);
-glm::vec3 neptune2Translate = glm::vec3(0.0f);
-glm::vec3 moonTranslate = glm::vec3(0.0f);
-glm::vec3 moon2Translate = glm::vec3(0.0f);
+glm::vec3 mercuryTranslate = glm::vec3(2000.0f);
+glm::vec3 mercury2Translate = glm::vec3(200.0f);
+glm::vec3 venusTranslate = glm::vec3(300.0f);
+glm::vec3 venus2Translate = glm::vec3(400.0f);
+glm::vec3 earthTranslate = glm::vec3(500.0f);
+glm::vec3 earth2Translate = glm::vec3(600.0f);
+glm::vec3 marsTranslate = glm::vec3(700.0f);
+glm::vec3 mars2Translate = glm::vec3(800.0f);
+glm::vec3 jupiterTranslate = glm::vec3(900.0f);
+glm::vec3 jupiter2Translate = glm::vec3(1000.0f);
+glm::vec3 saturnTranslate = glm::vec3(1100.0f);
+glm::vec3 saturn2Translate = glm::vec3(1200.0f);
+glm::vec3 uranusTranslate = glm::vec3(1300.0f);
+glm::vec3 uranus2Translate = glm::vec3(1400.0f);
+glm::vec3 neptuneTranslate = glm::vec3(1500.0f);
+glm::vec3 neptune2Translate = glm::vec3(1600.0f);
+glm::vec3 moonTranslate = glm::vec3(1700.0f);
+glm::vec3 moon2Translate = glm::vec3(1800.0f);
 
 GLuint textureId;
 
 glm::vec3 wspolrzedne[400];
 glm::vec3 wspolrzedneUfo[4] = {
-	glm::vec3(0.0f), glm::vec3(40.0f), glm::vec3(80.0f), glm::vec3(120.0f)
+	glm::vec3(120.0f), glm::vec3(125.0f), glm::vec3(130.0f), glm::vec3(135.0f)
 };
 glm::vec3 wektor[4] = {
-	glm::vec3(0.0f), glm::vec3(40.0f), glm::vec3(80.0f), glm::vec3(120.0f)
+	glm::vec3(120.0f), glm::vec3(125.0f), glm::vec3(130.0f), glm::vec3(135.0f)
 };
 
 float roznicaX, roznicaY, roznicaZ;
@@ -196,6 +187,57 @@ ParticleEffect* effect;
 
 float swidth = 650.0f, sheight = 650.0f;
 
+//COLLISIONS
+static PxFilterFlags simulationFilterShader(PxFilterObjectAttributes attributes0,
+	PxFilterData filterData0, PxFilterObjectAttributes attributes1, PxFilterData filterData1,
+	PxPairFlags& pairFlags, const void* constantBlock, PxU32 constantBlockSize)
+{
+	pairFlags =
+		PxPairFlag::eCONTACT_DEFAULT | // default contact processing
+		PxPairFlag::eNOTIFY_CONTACT_POINTS | // contact points will be available in onContact callback
+		PxPairFlag::eNOTIFY_TOUCH_FOUND |
+		PxPairFlag::eNOTIFY_TOUCH_PERSISTS;// onContact callback will be called for this pair
+
+	return physx::PxFilterFlag::eDEFAULT;
+}
+class SimulationEventCallback : public PxSimulationEventCallback
+{
+public:
+	void onContact(const PxContactPairHeader& pairHeader,
+		const PxContactPair* pairs, PxU32 nbPairs)
+	{
+		for (PxU32 i = 0; i < nbPairs; i++) {
+			const PxContactPair& cp = pairs[i];
+			//std::cout << "Contact points: " << (int)cp.contactCount << std::endl;
+			PxContactPairPoint* v;
+			v = new PxContactPairPoint[sizeof(PxContactPairPoint)];
+			for (PxU32 j = 0; j < cp.extractContacts(v, sizeof(v)); j++) {
+				std::cout << "QQQQQQQQQQQ" << std::endl;
+				std::cout << "x:" << v[j].position.x << " y:" << v[j].position.y << " z:" << v[j].position.z << std::endl;
+				std::cout << pairHeader.actors[0] << "  " << pairHeader.actors[1] << std::endl;
+				std::cout << "QQQQQQQQQQQ" << std::endl;
+			}
+			delete [] v;
+		}
+	}
+
+	// The functions below are not used in this exercise.
+	// However, they need to be defined for the class to compile.
+	virtual void onConstraintBreak(PxConstraintInfo* constraints, PxU32 count) {}
+	virtual void onWake(PxActor** actors, PxU32 count) {}
+	virtual void onSleep(PxActor** actors, PxU32 count) {}
+	virtual void onTrigger(PxTriggerPair* pairs, PxU32 count) {}
+	virtual void onAdvance(const PxRigidBody* const* bodyBuffer, const PxTransform* poseBuffer, const PxU32 count) {}
+};
+SimulationEventCallback simulationEventCallback;
+//COLLISIONS
+
+/// SCENE
+Physics scene(0 /* gravity (m/s^2) */, simulationFilterShader,
+	&simulationEventCallback);
+const double physicsStepTime = 1.f / 60.f;
+double physicsTimeToProcess = 0;
+/// SCENE
 
 void initPhysicsScene()
 {
@@ -379,9 +421,9 @@ void initPhysicsScene()
 	moonBody2->userData = moon2;
 	scene.scene->addActor(*moonBody2);
 
-	ufoBody = scene.physics->createRigidDynamic(PxTransform(0,0,0));
+	ufoBody = scene.physics->createRigidDynamic(PxTransform(10000,10000,10000));
 	ufoMaterial = scene.physics->createMaterial(1, 1, 0.6);
-	PxShape* ufoShape = scene.physics->createShape(PxSphereGeometry(5.5), *ufoMaterial);
+	PxShape* ufoShape = scene.physics->createShape(PxSphereGeometry(5), *ufoMaterial);
 	ufoBody->attachShape(*ufoShape);
 	ufoShape->release();
 	ufoBody->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
@@ -535,7 +577,6 @@ void lowerForces() {
 	else {
 		F_zc += 0.05f;
 	}
-	std::cout << F_zc << endl;
 }
 
 glm::vec3 predictMove() {
