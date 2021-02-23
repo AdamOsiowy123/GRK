@@ -4,13 +4,13 @@ layout (location = 0) in vec4 vertex;
 
 out vec3 TexCoords;
 
-uniform mat4 projection;
-uniform vec3 position;
-uniform mat4 shipProjectionMatrix;
+uniform mat4 cameraProjectionMatrix;
+uniform vec3 particlePosition;
+uniform mat4 shipModelMatrix;
 
 void main()
 {
 	float scale = 500.0f;
     TexCoords = vertex.xyz;
-    gl_Position = projection * shipProjectionMatrix * vec4((vertex.xyz * scale) + position, 1.0);
+    gl_Position = cameraProjectionMatrix * shipModelMatrix * vec4((vertex.xyz * scale) + particlePosition, 1.0);
 }
