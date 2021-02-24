@@ -231,6 +231,11 @@ public:
 				particleMatrix[3][0] = collisionCoords.x;
 				particleMatrix[3][1] = collisionCoords.y;
 				particleMatrix[3][2] = collisionCoords.z;
+				if (pairHeader.actors[0] == rocketBody || pairHeader.actors[1] == rocketBody) {
+					std::cout << "RAKIETA UDERZYLA" << std::endl;
+					pairHeader.actors[0]->userData == nullptr;
+					pairHeader.actors[1]->userData == nullptr;
+				}
 				effect = new ParticleEffect(programParticle, 1, 0.0015625f, textureParticle, glm::vec3(0, 0, 0), glm::vec3((rand() % 10 - 5) * 100.0f, (rand() % 10 - 5) * 100.0f, 0.0f));
 				std::cout << pairHeader.actors[0] << "  " << pairHeader.actors[1] << std::endl;
 				std::cout << "QQQQQQQQQQQ" << std::endl;
@@ -538,7 +543,8 @@ void keyboard(unsigned char key, int x, int y)
 	case 'm': shipAngle += glm::radians(2.0f); break;
 	case 'f': freeLook = !freeLook; break;
 	case 'r': F_front = 0; F_side = 0; F_zc = 0; F_qe = 0; break;
-	case 'k': joint->release(); rocketBody->setLinearVelocity(PxVec3(0, 0, 20)); break;
+	case 'k': joint->release(); PxRigidBodyExt::addLocalForceAtLocalPos(*rocketBody, PxVec3(0, 0, -10.0), PxVec3(0, 0, 0));
+		PxRigidBodyExt::addLocalForceAtLocalPos(*rocketBody, PxVec3(0, -1.0, 0), PxVec3(0, 0, -0.1));; break;
 	}
 }
 
