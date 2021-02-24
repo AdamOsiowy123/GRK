@@ -35,6 +35,8 @@ float F_zc = 0.0f;
 Ship* rocket;
 PxRigidDynamic* rocketBody = nullptr;
 PxMaterial* rocketMaterial = nullptr;
+
+PxFixedJoint* joint;
 /// PHYSICS SHIP
 
 /// PHYSICS ASTEROIDs
@@ -445,6 +447,17 @@ void initPhysicsScene()
 	ufoBody->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
 	ufoBody->userData = ufo;
 	scene.scene->addActor(*ufoBody);
+
+	rocketBody = scene.physics->createRigidDynamic(PxTransform(300,1,300));
+	rocketMaterial = scene.physics->createMaterial(1, 1, 0.6);
+	PxShape* rocketShape = scene.physics->createShape(PxCapsuleGeometry(0.1, 0.2), *rocketMaterial);
+	rocketBody->attachShape(*rocketShape);
+	rocketShape->release();
+	rocketBody->userData = rocket;
+	PxRigidBodyExt::updateMassAndInertia(*rocketBody, 0.1);
+	scene.scene->addActor(*rocketBody);
+
+	joint = PxFixedJointCreate(*scene.physics, shipBody, PxTransform(0, -0.005, 0), rocketBody, PxTransform(0, 0.005, 0));
 }
 
 void updateTransforms()
@@ -525,6 +538,7 @@ void keyboard(unsigned char key, int x, int y)
 	case 'm': shipAngle += glm::radians(2.0f); break;
 	case 'f': freeLook = !freeLook; break;
 	case 'r': F_front = 0; F_side = 0; F_zc = 0; F_qe = 0; break;
+	case 'k': joint->release(); rocketBody->setLinearVelocity(PxVec3(0, 0, 20)); break;
 	}
 }
 
@@ -771,10 +785,11 @@ void drawObjects() {
 	ship->draw(ship->getColor(), cameraPos, perspectiveMatrix, cameraMatrix);
 	//
 
-	rocketMatrix = ship->getMatrix();
-	rocketMatrix[3][1] -= 0.1f;
-	rocketMatrix = rocketMatrix * glm::scale(glm::vec3(0.3f));
-	rocket->setMatrix(rocketMatrix);
+	//rocketMatrix = ship->getMatrix();
+	//rocketMatrix[3][1] -= 0.1f;
+	//rocketMatrix = rocketMatrix * glm::scale(glm::vec3(0.3f));
+	//rocket->setMatrix(rocketMatrix);
+	rocket->setMatrix(rocket->getMatrix() * glm::rotate(shipAngle,glm::vec3(0,1,0)) * glm::scale(glm::vec3(0.00024f)));
 	rocket->draw(rocket->getColor(), cameraPos, perspectiveMatrix, cameraMatrix);
 
 	ufo->setMatrix(glm::translate(predictMove()) * glm::scale(glm::vec3(4.0f)));
@@ -1019,7 +1034,6 @@ void init()
 	Skybox::initSkybox();
 	createObjects();
 	initPhysicsScene();
-
 	appLoadingTime = glutGet(GLUT_ELAPSED_TIME)/1000.0f;
 
 }
