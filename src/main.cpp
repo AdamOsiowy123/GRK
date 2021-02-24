@@ -195,6 +195,7 @@ float appLoadingTime;
 
 ParticleEffect* effect;
 
+
 float swidth = 650.0f, sheight = 650.0f;
 
 //COLLISIONS
@@ -218,7 +219,6 @@ public:
 	{
 		for (PxU32 i = 0; i < nbPairs; i++) {
 			const PxContactPair& cp = pairs[i];
-			//std::cout << "Contact points: " << (int)cp.contactCount << std::endl;
 			PxContactPairPoint* v;
 			v = new PxContactPairPoint[sizeof(PxContactPairPoint)];
 			for (PxU32 j = 0; j < cp.extractContacts(v, sizeof(v)); j++) {
@@ -233,8 +233,8 @@ public:
 				particleMatrix[3][2] = collisionCoords.z;
 				if (pairHeader.actors[0] == rocketBody || pairHeader.actors[1] == rocketBody) {
 					std::cout << "RAKIETA UDERZYLA" << std::endl;
-					pairHeader.actors[0]->userData == nullptr;
-					pairHeader.actors[1]->userData == nullptr;
+					pairHeader.actors[0]->userData = nullptr;
+					pairHeader.actors[1]->userData = nullptr;
 				}
 				effect = new ParticleEffect(programParticle, 1, 0.0015625f, textureParticle, glm::vec3(0, 0, 0), glm::vec3((rand() % 10 - 5) * 100.0f, (rand() % 10 - 5) * 100.0f, 0.0f));
 				std::cout << pairHeader.actors[0] << "  " << pairHeader.actors[1] << std::endl;
@@ -244,8 +244,6 @@ public:
 		}
 	}
 
-	// The functions below are not used in this exercise.
-	// However, they need to be defined for the class to compile.
 	virtual void onConstraintBreak(PxConstraintInfo* constraints, PxU32 count) {}
 	virtual void onWake(PxActor** actors, PxU32 count) {}
 	virtual void onSleep(PxActor** actors, PxU32 count) {}
@@ -479,12 +477,10 @@ void updateTransforms()
 			// We use the userData of the objects to set up the model matrices
 			// of proper renderables.
 			if (!actor->userData) continue;
-			//glm::mat4* modelMatrix = (glm::mat4*)actor->userData;
 			Object* obj = (Object*)actor->userData;
 
 			// get world matrix of the object (actor)
 			PxMat44 transform = actor->getGlobalPose();
-			//std::cout << glm::to_string(glm::vec3(actor->getGlobalPose().p.x, actor->getGlobalPose().p.y, actor->getGlobalPose().p.z)) << std::endl;
 			auto& c0 = transform.column0;
 			auto& c1 = transform.column1;
 			auto& c2 = transform.column2;
@@ -500,7 +496,7 @@ void updateTransforms()
 	}
 }
 
-void text(int x, int y, std::string text, int rozmiar)
+void text(int x, int y, std::string text, int size)
 {
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
@@ -512,12 +508,11 @@ void text(int x, int y, std::string text, int rozmiar)
 	glPushAttrib(GL_DEPTH_TEST);
 	glDisable(GL_DEPTH_TEST);
 	glRasterPos2i(x, y);
-	void* rozm = GLUT_BITMAP_HELVETICA_18;
-	if (rozmiar == 18) rozm = GLUT_BITMAP_HELVETICA_18;
-	if (rozmiar == 12) rozm = GLUT_BITMAP_HELVETICA_12;
+	void* siz = GLUT_BITMAP_HELVETICA_18;
+	if (size == 18) siz = GLUT_BITMAP_HELVETICA_18;
 	for (int i = 0; i < text.size(); i++)
 	{
-		glutBitmapCharacter(rozm, text[i]);
+		glutBitmapCharacter(siz, text[i]);
 	}
 	glPopAttrib();
 	glMatrixMode(GL_PROJECTION);
@@ -676,11 +671,10 @@ glm::vec3 predictMove() {
 glm::mat4 createCameraMatrixF()
 {
 	rotation = glm::quat_cast(cameraMatrix);
-	PxTransform pxtr = shipBody->getGlobalPose();
-	glm::quat pxtq = glm::quat(pxtr.q.w, pxtr.q.x, pxtr.q.y, pxtr.q.z);
-	glm::vec3 cameraDirMat = pxtq * glm::vec3(0, 0, 1);
-	glm::vec3 offset = cameraDirMat * 0.65f;
-	cameraPos = offset + glm::vec3(pxtr.p.x, pxtr.p.y - 0.65f, pxtr.p.z);
+	PxTransform shipPosition = shipBody->getGlobalPose();
+	glm::quat shipQuaternion = glm::quat(shipPosition.q.w, shipPosition.q.x, shipPosition.q.y, shipPosition.q.z);
+	glm::vec3 offset = glm::quat(shipPosition.q.w, shipPosition.q.x, shipPosition.q.y, shipPosition.q.z) * glm::vec3(0, 0, 1) * 0.65f;
+	cameraPos = offset + glm::vec3(shipPosition.p.x, shipPosition.p.y - 0.65f, shipPosition.p.z);
 
 	glm::quat kwaternionX = glm::angleAxis(roznicaY, glm::vec3(1, 0, 0));
 	glm::quat kwaternionY = glm::angleAxis(roznicaX, glm::vec3(0, 1, 0));
@@ -703,22 +697,15 @@ glm::mat4 createCameraMatrixF()
 
 glm::mat4 createCameraMatrix()
 {
-	PxTransform pxtr = shipBody->getGlobalPose();
-	glm::quat pxtq = glm::quat(pxtr.q.w, pxtr.q.x, pxtr.q.y, pxtr.q.z);
-	glm::vec3 cameraDirMat = pxtq * glm::vec3(0, 0, 1);
-	glm::vec3 offset = cameraDirMat * 0.65f;
-	cameraPos = offset + glm::vec3(pxtr.p.x, pxtr.p.y - 0.65f, pxtr.p.z);
-
+	PxTransform shipPosition = shipBody->getGlobalPose();
+	glm::quat shipQuaternion = glm::quat(shipPosition.q.w, shipPosition.q.x, shipPosition.q.y, shipPosition.q.z);
+	glm::vec3 offset = glm::quat(shipPosition.q.w, shipPosition.q.x, shipPosition.q.y, shipPosition.q.z) * glm::vec3(0, 0, 1) * 0.65f;
+	cameraPos = offset + glm::vec3(shipPosition.p.x, shipPosition.p.y - 0.65f, shipPosition.p.z);
 	glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+	glm::vec3 cameraTarget = glm::vec3(shipPosition.p.x, shipPosition.p.y - 0.65f, shipPosition.p.z);
+	cameraDir = glm::normalize(cameraPos - cameraTarget);
 
-	glm::vec3 cameraTarget = glm::vec3(pxtr.p.x, pxtr.p.y - 0.65f, pxtr.p.z);
-	glm::vec3 cameraDirection = glm::normalize(cameraPos - cameraTarget);
-
-	cameraDir = cameraDirection;
-
-	glm::mat4 returnowaTablica = glm::lookAt(cameraPos, cameraPos - cameraDirection, cameraUp);
-
-	return glm::translate(glm::vec3(0, -1, 0)) * returnowaTablica;
+	return glm::translate(glm::vec3(0, -1, 0)) * glm::lookAt(cameraPos, cameraPos - cameraDir, cameraUp);
 
 }
 
