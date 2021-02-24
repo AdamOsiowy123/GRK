@@ -35,13 +35,15 @@ float F_zc = 0.0f;
 Ship* rocket;
 PxRigidDynamic* rocketBody = nullptr;
 PxMaterial* rocketMaterial = nullptr;
-
+bool isRocketDestroyed = false;
 PxFixedJoint* joint;
 /// PHYSICS SHIP
 
+std::vector<physx::PxActor*> actorsToRemove;
+
 /// PHYSICS ASTEROIDs
-Asteroid* asteroids[280];
-PxRigidDynamic* asteroidsBody[280];
+std::vector<Asteroid*> asteroids;
+std::vector<PxRigidDynamic*> asteroidsBody;
 PxMaterial* asteroidMaterial = nullptr;
 /// PHYSICS ASTEROIDs
 
@@ -192,11 +194,26 @@ bool mouseKeyDown = false;
 bool freeLook = false;
 
 float appLoadingTime;
+float timeF;
+float whenShot = 0.0f;
 
 ParticleEffect* effect;
 
-
 float swidth = 650.0f, sheight = 650.0f;
+
+bool isActorAsteroid(PxRigidActor &actor) {
+	int arrayLenght = asteroidsBody.size();
+	std::cout << "actor: " << &actor << std::endl;
+	PxRigidDynamic* asteroidBody = (PxRigidDynamic*)actor.userData;
+
+	for (int i = 0; i < arrayLenght; i++) {
+		if (&actor == asteroidsBody[i]) {
+			std::cout << "body: " << asteroidsBody[i] << std::endl;
+			return true;
+		}
+	}
+	return false;
+}
 
 //COLLISIONS
 static PxFilterFlags simulationFilterShader(PxFilterObjectAttributes attributes0,
@@ -231,10 +248,15 @@ public:
 				particleMatrix[3][0] = collisionCoords.x;
 				particleMatrix[3][1] = collisionCoords.y;
 				particleMatrix[3][2] = collisionCoords.z;
+				//bool b1 = isActorAsteroid(*pairHeader.actors[0]);
+				//std::cout << b1 << std::endl;
+				//bool b2 = isActorAsteroid(*pairHeader.actors[1]);
+				//std::cout << b2 << std::endl;
 				if (pairHeader.actors[0] == rocketBody || pairHeader.actors[1] == rocketBody) {
 					std::cout << "RAKIETA UDERZYLA" << std::endl;
-					pairHeader.actors[0]->userData = nullptr;
-					pairHeader.actors[1]->userData = nullptr;
+					actorsToRemove.emplace_back(pairHeader.actors[0]);
+					actorsToRemove.emplace_back(pairHeader.actors[1]);
+					isRocketDestroyed = true;
 				}
 				effect = new ParticleEffect(programParticle, 1, 0.0015625f, textureParticle, glm::vec3(0, 0, 0), glm::vec3((rand() % 10 - 5) * 100.0f, (rand() % 10 - 5) * 100.0f, 0.0f));
 				std::cout << pairHeader.actors[0] << "  " << pairHeader.actors[1] << std::endl;
@@ -271,7 +293,7 @@ void initPhysicsScene()
 	scene.scene->addActor(*shipBody);
 
 	for (int i=0; i < 280; i++) {
-		asteroidsBody[i] = scene.physics->createRigidDynamic(PxTransform(wspolrzedne[i].x,wspolrzedne[i].y,wspolrzedne[i].z));
+		asteroidsBody.emplace_back(scene.physics->createRigidDynamic(PxTransform(wspolrzedne[i].x,wspolrzedne[i].y,wspolrzedne[i].z)));
 		asteroidMaterial = scene.physics->createMaterial(1, 1, 0.6);
 		PxShape* asteroidShape = scene.physics->createShape(PxSphereGeometry(1), *asteroidMaterial);
 		asteroidsBody[i]->attachShape(*asteroidShape);
@@ -496,6 +518,15 @@ void updateTransforms()
 	}
 }
 
+void removeInActiveActors(){
+	for (auto actor : actorsToRemove) {
+		Object* obj = (Object*)actor->userData;
+		obj->setMatrix(glm::mat4(0));
+		scene.scene->removeActor(*actor);
+	}
+	actorsToRemove.clear();
+}
+
 void text(int x, int y, std::string text, int size)
 {
 	glMatrixMode(GL_PROJECTION);
@@ -521,57 +552,31 @@ void text(int x, int y, std::string text, int size)
 	glPopMatrix();
 }
 
-void keyboard(unsigned char key, int x, int y)
-{
-	float angleSpeed = 0.1f;
-	float moveSpeed = 10.0f;
-	switch(key)
-	{
-	case 'w': F_front -= 25; break;
-	case 's': F_front += 25; break;
-	case 'd': F_side += 5.0f; break;
-	case 'a': F_side -= 5.0f; break;
-	case 'q': F_qe -= 15; break;
-	case 'e': F_qe += 15; break;
-	case 'z': F_zc += 5; break;
-	case 'c': F_zc -= 5; break;
-	case 'm': shipAngle += glm::radians(2.0f); break;
-	case 'f': freeLook = !freeLook; break;
-	case 'r': F_front = 0; F_side = 0; F_zc = 0; F_qe = 0; break;
-	case 'k': joint->release(); PxRigidBodyExt::addLocalForceAtLocalPos(*rocketBody, PxVec3(0, 0, -10.0), PxVec3(0, 0, 0));
-		PxRigidBodyExt::addLocalForceAtLocalPos(*rocketBody, PxVec3(0, -1.0, 0), PxVec3(0, 0, -0.1));; break;
+void shoot() {
+	if (joint) {
+		whenShot = timeF;
+		joint->release();
+		PxRigidBodyExt::addLocalForceAtLocalPos(*rocketBody, PxVec3(0, 0, -10.0), PxVec3(0, 0, 0));
+		PxRigidBodyExt::addLocalForceAtLocalPos(*rocketBody, PxVec3(0, -1.0, 0), PxVec3(0, 0, -0.1));
+		joint = nullptr;
 	}
 }
 
-void mouse(int x, int y)
-{	
-	if (freeLook) {
-		roznicaX = (x - ostatniX) / 100.0f;
-		roznicaY = (y - ostatniY) / 100.0f;
-		ostatniX = x;
-		ostatniY = y;
-	}
-}
+void reloadRocket(){
+	if (isRocketDestroyed || (timeF-whenShot>5 && whenShot > 0)) {
+		rocketBody = scene.physics->createRigidDynamic(PxTransform(shipBody->getGlobalPose()));
+		rocketMaterial = scene.physics->createMaterial(1, 1, 0.6);
+		PxShape* rocketShape = scene.physics->createShape(PxCapsuleGeometry(0.1, 0.2), *rocketMaterial);
+		rocketBody->attachShape(*rocketShape);
+		rocketShape->release();
+		rocketBody->userData = rocket;
+		PxRigidBodyExt::updateMassAndInertia(*rocketBody, 0.1);
+		scene.scene->addActor(*rocketBody);
 
-void mouseClick(int button, int state, int x, int y) {
-	if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN) {
-		if (mouseKeyDown) {
-			mouseKeyDown = false;
-			cameraPos -= cameraDir * 50.0f;
-		}
-		else {
-			mouseKeyDown = true;
-			cameraPos += cameraDir * 50.0f;
-		}
+		joint = PxFixedJointCreate(*scene.physics, shipBody, PxTransform(0, -0.005, 0), rocketBody, PxTransform(0, 0.005, 0));
+		isRocketDestroyed = false;
+		whenShot = 0;
 	}
-	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
-		effect = new ParticleEffect(programParticle, 1, 0.0015625f, textureParticle, glm::vec3(0,0,0), glm::vec3(0,0,0));
-
-	}
-}
-
-void loadParticleTextures() {
-	textureParticle = Core::LoadParticleTextures();
 }
 
 void lowerForces() {
@@ -741,7 +746,7 @@ void createObjects() {
 	for (int i = 0; i < 280; i++) {
 		//std::shared_ptr<Asteroid> asteroid = Asteroid::create(programBump, &sphereModel, glm::translate(wspolrzedne[i]), textureAsteroid, sunPos, sunPos2);
 		//asteroid->setNormal(textureAsteroid_normals);
-		asteroids[i] = new Asteroid(programBump, &sphereModel, glm::translate(wspolrzedne[i]), textureAsteroid, sunPos, sunPos2);
+		asteroids.emplace_back(new Asteroid(programBump, &sphereModel, glm::translate(wspolrzedne[i]), textureAsteroid, sunPos, sunPos2));
 		asteroids[i]->setNormal(textureAsteroid_normals);
 		//renderables.emplace_back(asteroid);
 	}
@@ -769,7 +774,7 @@ void createObjects() {
 }
 
 void drawObjects() {
-	float timeF = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
+	timeF = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
 
 	// ship
 	//ship.setMatrix(shipModelMatrix);
@@ -796,6 +801,7 @@ void drawObjects() {
 	sun2->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);
 	
 	for (auto obj : asteroids) {
+		obj->setMatrix(obj->getMatrix());
 		obj->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);
 	}
 
@@ -805,7 +811,7 @@ void drawObjects() {
 	//mercury
 	mercuryTranslate = glm::vec3(sunPos.x + 170.0f * sinf(timeF / 8), sunPos.y, sunPos.z + 170.0f * cosf(timeF / 8));
 	mercury->setMatrix(glm::translate(mercuryTranslate) * planetRotation * glm::scale(glm::vec3(20 * 0.48f)));
-	mercuryBody->setKinematicTarget(PxTransform(mercury->getMatrix()[3][0], mercury->getMatrix()[3][1], mercury->getMatrix()[3][2]));
+	if(mercuryBody) mercuryBody->setKinematicTarget(PxTransform(mercury->getMatrix()[3][0], mercury->getMatrix()[3][1], mercury->getMatrix()[3][2]));
 	mercury->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);
 	//
 
@@ -942,6 +948,8 @@ void drawObjects() {
 		}
 	}
 	//
+
+	reloadRocket();
 }
 
 void renderScene()
@@ -982,10 +990,41 @@ void renderScene()
 
 	updateTransforms();
 	lowerForces();
-
+	removeInActiveActors();
 	Skybox::renderSkybox(programSkybox, cameraMatrix, perspectiveMatrix);
 	drawObjects();
 	glutSwapBuffers();
+}
+
+void mouse(int x, int y)
+{
+	if (freeLook) {
+		roznicaX = (x - ostatniX) / 100.0f;
+		roznicaY = (y - ostatniY) / 100.0f;
+		ostatniX = x;
+		ostatniY = y;
+	}
+}
+
+void mouseClick(int button, int state, int x, int y) {
+	if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN) {
+		if (mouseKeyDown) {
+			mouseKeyDown = false;
+			cameraPos -= cameraDir * 50.0f;
+		}
+		else {
+			mouseKeyDown = true;
+			cameraPos += cameraDir * 50.0f;
+		}
+	}
+	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+		effect = new ParticleEffect(programParticle, 1, 0.0015625f, textureParticle, glm::vec3(0, 0, 0), glm::vec3(0, 0, 0));
+
+	}
+}
+
+void loadParticleTextures() {
+	textureParticle = Core::LoadParticleTextures();
 }
 
 void init()
@@ -1029,6 +1068,27 @@ void init()
 	initPhysicsScene();
 	appLoadingTime = glutGet(GLUT_ELAPSED_TIME)/1000.0f;
 
+}
+
+void keyboard(unsigned char key, int x, int y)
+{
+	float angleSpeed = 0.1f;
+	float moveSpeed = 10.0f;
+	switch (key)
+	{
+	case 'w': F_front -= 25; break;
+	case 's': F_front += 25; break;
+	case 'd': F_side += 5.0f; break;
+	case 'a': F_side -= 5.0f; break;
+	case 'q': F_qe -= 15; break;
+	case 'e': F_qe += 15; break;
+	case 'z': F_zc += 5; break;
+	case 'c': F_zc -= 5; break;
+	case 'm': shipAngle += glm::radians(2.0f); break;
+	case 'f': freeLook = !freeLook; break;
+	case 'r': F_front = 0; F_side = 0; F_zc = 0; F_qe = 0; break;
+	case 'k': shoot(); break;
+	}
 }
 
 void onReshape(int width, int height)
