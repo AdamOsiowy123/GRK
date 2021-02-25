@@ -237,23 +237,13 @@ public:
 			PxContactPairPoint* v;
 			v = new PxContactPairPoint[sizeof(PxContactPairPoint)];
 			for (PxU32 j = 0; j < cp.extractContacts(v, sizeof(v)); j++) {
-				std::cout << "QQQQQQQQQQQ" << std::endl;
+				std::cout << "Wspolrzedne kolizji" << std::endl;
 				std::cout << "x:" << v[j].position.x << " y:" << v[j].position.y << " z:" << v[j].position.z << std::endl;
 				collisionCoords.x = v[j].position.x;
 				collisionCoords.y = v[j].position.y;
 				collisionCoords.z = v[j].position.z;
-				glm::mat4 shipWithoutTranslate = ship->getMatrix();
-				shipWithoutTranslate[3][0] = 0;
-				shipWithoutTranslate[3][1] = 0;
-				shipWithoutTranslate[3][2] = 0;
-				//particleMatrix =  glm::translate(collisionCoords) * shipWithoutTranslate * glm::scale(glm::vec3(12500.0f));
-				particleMatrix = glm::scale(glm::vec3(500.0f));
-				/*particleMatrix[3][0] = collisionCoords.x;
-				particleMatrix[3][1] = collisionCoords.y;
-				particleMatrix[3][2] = collisionCoords.z;*/
-				//particleMatrix = particleMatrix * glm::scale(glm::vec3(120.0f));
 				if (pairHeader.actors[0] == rocketBody || pairHeader.actors[1] == rocketBody) {
-					std::cout << "RAKIETA UDERZYLA" << std::endl;
+					std::cout << "Rakieta zniszczona" << std::endl;
 					if (isObjectDestroyable(*pairHeader.actors[0])) {
 						actorsToRemove.emplace_back(pairHeader.actors[0]);
 					}
@@ -263,10 +253,7 @@ public:
 					isRocketDestroyed = true;
 				}
 				auto effect = new ParticleEffect(programParticle, 1, 0.0015625f * 2, textureParticle, collisionCoords, glm::vec3(0.0f, 0.0f, 0.0f));
-				effect->setShipModelMatrix(particleMatrix);
 				particleEffects.emplace_back(effect);
-				std::cout << pairHeader.actors[0] << "  " << pairHeader.actors[1] << std::endl;
-				std::cout << "QQQQQQQQQQQ" << std::endl;
 			}
 			delete [] v;
 		}
@@ -644,8 +631,8 @@ void lowerForces() {
 }
 
 glm::vec3 predictMove() {
-	PxTransform pxtr = shipBody->getGlobalPose();
-	glm::vec3 ship_pos = glm::vec3(pxtr.p.x, pxtr.p.y, pxtr.p.z);
+	PxTransform shipTransform = shipBody->getGlobalPose();
+	glm::vec3 ship_pos = glm::vec3(shipTransform.p.x, shipTransform.p.y, shipTransform.p.z);
 	float time = glutGet(GLUT_ELAPSED_TIME) / 1000.0f - appLoadingTime;
 	int sekundaRuchu = int(floorf(time));
 	float ułamekSekundy = time - sekundaRuchu;
@@ -771,11 +758,8 @@ void createObjects() {
 	sun2 = new Sun(programSun, &sphereModel, glm::translate(sunPos2) * glm::scale(glm::vec3(8 * 14.0f)), sunPos, sunPos2, textureSun);
 
 	for (int i = 0; i < 280; i++) {
-		//std::shared_ptr<Asteroid> asteroid = Asteroid::create(programBump, &sphereModel, glm::translate(wspolrzedne[i]), textureAsteroid, sunPos, sunPos2);
-		//asteroid->setNormal(textureAsteroid_normals);
 		asteroids.emplace_back(new Asteroid(programBump, &sphereModel, glm::translate(wspolrzedne[i]), textureAsteroid, sunPos, sunPos2));
 		asteroids[i]->setNormal(textureAsteroid_normals);
-		//renderables.emplace_back(asteroid);
 	}
 
 	mercury = new Planet(programTexture, &sphereModel, glm::translate(mercuryTranslate), textureMercury, sunPos, sunPos2);
@@ -804,21 +788,14 @@ void drawObjects() {
 	timeF = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
 
 	// ship
-	//ship.setMatrix(shipModelMatrix);
-	//shipBody->userData = &ship.getMatrix();
 	ship->setMatrix(ship->getMatrix() * glm::rotate(shipAngle, glm::vec3(0, 1, 0)) * glm::scale(glm::vec3(0.0008f)));
 	ship->draw(ship->getColor(), cameraPos, perspectiveMatrix, cameraMatrix);
 	//
 
-	//rocketMatrix = ship->getMatrix();
-	//rocketMatrix[3][1] -= 0.1f;
-	//rocketMatrix = rocketMatrix * glm::scale(glm::vec3(0.3f));
-	//rocket->setMatrix(rocketMatrix);
 	rocket->setMatrix(rocket->getMatrix() * glm::rotate(shipAngle,glm::vec3(0,1,0)) * glm::scale(glm::vec3(0.00024f)));
 	rocket->draw(rocket->getColor(), cameraPos, perspectiveMatrix, cameraMatrix);
 
 	ufo->setMatrix(glm::translate(predictMove()) * glm::scale(glm::vec3(4.0f)));
-	//ufo->setMatrix(glm::translate(glm::vec3(300,0,250)) * glm::scale(glm::vec3(4.0f)));
 	ufoBody->setKinematicTarget(PxTransform(ufo->getMatrix()[3][0], ufo->getMatrix()[3][1], ufo->getMatrix()[3][2]));
 	ufo->drawTexture(cameraPos, perspectiveMatrix, cameraMatrix);
 	
@@ -995,7 +972,6 @@ void renderScene()
 			physicsTimeToProcess -= physicsStepTime;
 		}
 	}
-	//shipBody->setAngularVelocity();
 	shipBody->setLinearVelocity(PxVec3(0, 0, 0));
 	shipBody->setAngularVelocity(PxVec3(0, 0, 0));
 
@@ -1045,7 +1021,6 @@ void mouseClick(int button, int state, int x, int y) {
 		}
 	}
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
-		//effect = new ParticleEffect(programParticle, 1, 0.0015625f, textureParticle, glm::vec3(0, 0, 0), glm::vec3(0, 0, 0));
 		shoot();
 	}
 }
@@ -1155,7 +1130,6 @@ int main(int argc, char ** argv)
 	glutSetOption(GLUT_MULTISAMPLE, 8);
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA | GLUT_MULTISAMPLE);
 	glEnable(GL_MULTISAMPLE);
-	//glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	glutInitWindowPosition(500, 30);
 	glutInitWindowSize(650, 650);
 	glutCreateWindow("Spaceship Simulator Project");

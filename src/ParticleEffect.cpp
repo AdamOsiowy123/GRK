@@ -66,7 +66,6 @@ void ParticleEffect::draw()
         if (p.Life > 0.0f)
         {
             glUniform3f(glGetUniformLocation(this->shader, "particlePosition"), p.Position.x, p.Position.y,p.Position.z);
-            //std::cout << "x:"<< p.Position.x << " y:" << p.Position.y << " z:" << p.Position.z << std::endl;
             glBindTexture(GL_TEXTURE_2D, selectTexture(p.Age));
             glBindVertexArray(this->VAO);
             glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -84,7 +83,6 @@ void ParticleEffect::update()
         Particle& p = this->particles[i];
         p.Life -= this->delta; 
         p.Age += (this->delta * (rand()%3 + 1));
-        //p.Age += 0.05625f;
         p.Position -= p.Velocity * this->delta;
     }
 }
@@ -123,7 +121,6 @@ void ParticleEffect::sendProjectionToShader(glm::mat4 persp, glm::mat4 camera)
 	glm::mat4 cameraProjectionMatrix;
 	cameraProjectionMatrix = persp * camera;
 	glUniformMatrix4fv(glGetUniformLocation(this->shader, "cameraProjectionMatrix"), 1, GL_FALSE, (float*)&cameraProjectionMatrix);
-    glUniformMatrix4fv(glGetUniformLocation(this->shader, "shipModelMatrix"), 1, GL_FALSE, (float*)&shipModelMatrix);
     glUseProgram(0);
 }
 
@@ -137,15 +134,6 @@ glm::vec3 ParticleEffect::getPosition()
     return this->position;
 }
 
-void ParticleEffect::setShipModelMatrix(glm::mat4 matrix)
-{
-    this->shipModelMatrix = matrix;
-}
-
-glm::mat4 ParticleEffect::getShipModelMatrix()
-{
-    return this->shipModelMatrix;
-}
 
 GLuint ParticleEffect::selectTexture(float age)
 {   
@@ -156,6 +144,5 @@ GLuint ParticleEffect::selectTexture(float age)
     else {
         index = int(age / (this->delta * 5));
     }
-    //std::cout << "index: " << index << std::endl;
     return this->textures[index];
 }

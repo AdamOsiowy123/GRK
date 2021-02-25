@@ -6,7 +6,6 @@ out vec2 TexCoords;
 
 uniform mat4 cameraProjectionMatrix;
 uniform vec3 particlePosition;
-uniform mat4 shipModelMatrix;
 
 void main()
 {
