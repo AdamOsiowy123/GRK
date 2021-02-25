@@ -35,10 +35,13 @@ class ParticleEffect
 public:
     ParticleEffect(GLuint shader, unsigned int amount, float delta, std::vector<GLuint> textures,glm::vec3 position, glm::vec3 velocity);
     void simulate();
-    void sendProjectionToShader(glm::mat4 persp, glm::mat4 camera,glm::mat4 shipModelMatrix);
+    void sendProjectionToShader(glm::mat4 persp, glm::mat4 camera);
     bool isActive();
     glm::vec3 getPosition();
+    void setShipModelMatrix(glm::mat4 matrix);
+    glm::mat4 getShipModelMatrix();
 private:
+    glm::mat4 shipModelMatrix;
     GLuint shader;
     std::vector<Particle> particles;
     std::vector<GLuint> textures;

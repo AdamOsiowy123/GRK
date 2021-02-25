@@ -51,7 +51,7 @@ void ParticleEffect::init()
 
     glm::vec3 pos;
     for (unsigned int i = 0; i < this->amount; ++i) {
-        pos = this->position + glm::vec3(rand()%10,rand()%10,rand()%10);
+        pos = this->position;
         this->particles.push_back(Particle(pos, this->velocity));
     }
 }
@@ -117,7 +117,7 @@ void ParticleEffect::deleteDeadParticles()
     }
 }
 
-void ParticleEffect::sendProjectionToShader(glm::mat4 persp, glm::mat4 camera, glm::mat4 shipModelMatrix)
+void ParticleEffect::sendProjectionToShader(glm::mat4 persp, glm::mat4 camera)
 {
 	glUseProgram(this->shader);
 	glm::mat4 cameraProjectionMatrix;
@@ -135,6 +135,16 @@ bool ParticleEffect::isActive()
 glm::vec3 ParticleEffect::getPosition()
 {
     return this->position;
+}
+
+void ParticleEffect::setShipModelMatrix(glm::mat4 matrix)
+{
+    this->shipModelMatrix = matrix;
+}
+
+glm::mat4 ParticleEffect::getShipModelMatrix()
+{
+    return this->shipModelMatrix;
 }
 
 GLuint ParticleEffect::selectTexture(float age)

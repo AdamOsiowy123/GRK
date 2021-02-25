@@ -239,9 +239,12 @@ public:
 			for (PxU32 j = 0; j < cp.extractContacts(v, sizeof(v)); j++) {
 				std::cout << "QQQQQQQQQQQ" << std::endl;
 				std::cout << "x:" << v[j].position.x << " y:" << v[j].position.y << " z:" << v[j].position.z << std::endl;
-				collisionCoords.x = v[j].position.x + 8.f;
-				collisionCoords.y = v[j].position.y - 15.0f;
-				collisionCoords.z = v[j].position.z + 3.f;
+				//collisionCoords.x = v[j].position.x + 8.f;
+				//collisionCoords.y = v[j].position.y - 15.0f;
+				//collisionCoords.z = v[j].position.z + 3.f;
+				collisionCoords.x = v[j].position.x;
+				collisionCoords.y = v[j].position.y;
+				collisionCoords.z = v[j].position.z;
 				particleMatrix = ship->getMatrix();
 				particleMatrix[3][0] = collisionCoords.x;
 				particleMatrix[3][1] = collisionCoords.y;
@@ -256,7 +259,9 @@ public:
 					}
 					isRocketDestroyed = true;
 				}
-				particleEffects.emplace_back(new ParticleEffect(programParticle, 1, 0.0015625f, textureParticle, glm::vec3(0, 0, 0), glm::vec3((rand() % 10 - 5) * 100.0f, (rand() % 10 - 5) * 100.0f, 0.0f)));
+				auto effect = new ParticleEffect(programParticle, 1, 0.0015625f, textureParticle, glm::vec3(0, 0, 0), glm::vec3((rand() % 10 - 5), (rand() % 10 - 5), 0.0f));
+				effect->setShipModelMatrix(particleMatrix);
+				particleEffects.emplace_back(effect);
 				std::cout << pairHeader.actors[0] << "  " << pairHeader.actors[1] << std::endl;
 				std::cout << "QQQQQQQQQQQ" << std::endl;
 			}
@@ -962,7 +967,7 @@ void drawObjects() {
 	//particle effect
 	for (auto effect : particleEffects) {
 		if (effect->isActive()) {
-				effect->sendProjectionToShader(perspectiveMatrix, cameraMatrix, particleMatrix);
+				effect->sendProjectionToShader(perspectiveMatrix, cameraMatrix);
 				effect->simulate();
 			}
 	}
