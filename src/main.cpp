@@ -1,4 +1,4 @@
-#include "glew.h"
+ï»¿#include "glew.h"
 #include "freeglut.h"
 #include "glm.hpp"
 #include "ext.hpp"
@@ -239,16 +239,19 @@ public:
 			for (PxU32 j = 0; j < cp.extractContacts(v, sizeof(v)); j++) {
 				std::cout << "QQQQQQQQQQQ" << std::endl;
 				std::cout << "x:" << v[j].position.x << " y:" << v[j].position.y << " z:" << v[j].position.z << std::endl;
-				//collisionCoords.x = v[j].position.x + 8.f;
-				//collisionCoords.y = v[j].position.y - 15.0f;
-				//collisionCoords.z = v[j].position.z + 3.f;
 				collisionCoords.x = v[j].position.x;
 				collisionCoords.y = v[j].position.y;
 				collisionCoords.z = v[j].position.z;
-				particleMatrix = ship->getMatrix();
-				particleMatrix[3][0] = collisionCoords.x;
+				glm::mat4 shipWithoutTranslate = ship->getMatrix();
+				shipWithoutTranslate[3][0] = 0;
+				shipWithoutTranslate[3][1] = 0;
+				shipWithoutTranslate[3][2] = 0;
+				//particleMatrix =  glm::translate(collisionCoords) * shipWithoutTranslate * glm::scale(glm::vec3(12500.0f));
+				particleMatrix = glm::scale(glm::vec3(500.0f));
+				/*particleMatrix[3][0] = collisionCoords.x;
 				particleMatrix[3][1] = collisionCoords.y;
-				particleMatrix[3][2] = collisionCoords.z;
+				particleMatrix[3][2] = collisionCoords.z;*/
+				//particleMatrix = particleMatrix * glm::scale(glm::vec3(120.0f));
 				if (pairHeader.actors[0] == rocketBody || pairHeader.actors[1] == rocketBody) {
 					std::cout << "RAKIETA UDERZYLA" << std::endl;
 					if (isObjectDestroyable(*pairHeader.actors[0])) {
@@ -645,12 +648,12 @@ glm::vec3 predictMove() {
 	glm::vec3 ship_pos = glm::vec3(pxtr.p.x, pxtr.p.y, pxtr.p.z);
 	float time = glutGet(GLUT_ELAPSED_TIME) / 1000.0f - appLoadingTime;
 	int sekundaRuchu = int(floorf(time));
-	float u³amekSekundy = time - sekundaRuchu;
+	float uï¿½amekSekundy = time - sekundaRuchu;
 	wektor[0] = wspolrzedneUfo[(sekundaRuchu - 1) % 4];
 	wektor[1] = wspolrzedneUfo[(sekundaRuchu) % 4];
 	wektor[2] = wspolrzedneUfo[(sekundaRuchu + 1) % 4];
 	wektor[3] = wspolrzedneUfo[(sekundaRuchu + 2) % 4];
-	glm::vec3 catmull = glm::catmullRom(wektor[0], wektor[1], wektor[2], wektor[3], u³amekSekundy);
+	glm::vec3 catmull = glm::catmullRom(wektor[0], wektor[1], wektor[2], wektor[3], uï¿½amekSekundy);
 	wspolrzedneUfo[0] = wspolrzedneUfo[1];
 	wspolrzedneUfo[1] = wspolrzedneUfo[2];
 	wspolrzedneUfo[2] = wspolrzedneUfo[3];
