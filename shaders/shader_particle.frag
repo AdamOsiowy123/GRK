@@ -1,6 +1,6 @@
 #version 430 core
 
-in vec3 TexCoords;
+in vec2 TexCoords;
 
 uniform sampler2D tex;
 

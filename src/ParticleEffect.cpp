@@ -51,7 +51,7 @@ void ParticleEffect::init()
 
     glm::vec3 pos;
     for (unsigned int i = 0; i < this->amount; ++i) {
-        pos = this->position + glm::vec3(rand()%10,rand()%10,rand()%10);
+        pos = this->position;
         this->particles.push_back(Particle(pos, this->velocity));
     }
 }

@@ -239,13 +239,19 @@ public:
 			for (PxU32 j = 0; j < cp.extractContacts(v, sizeof(v)); j++) {
 				std::cout << "QQQQQQQQQQQ" << std::endl;
 				std::cout << "x:" << v[j].position.x << " y:" << v[j].position.y << " z:" << v[j].position.z << std::endl;
-				collisionCoords.x = v[j].position.x + 8.f;
-				collisionCoords.y = v[j].position.y - 15.0f;
-				collisionCoords.z = v[j].position.z + 3.f;
-				particleMatrix = ship->getMatrix();
-				particleMatrix[3][0] = collisionCoords.x;
+				collisionCoords.x = v[j].position.x;
+				collisionCoords.y = v[j].position.y;
+				collisionCoords.z = v[j].position.z;
+				glm::mat4 shipWithoutTranslate = ship->getMatrix();
+				shipWithoutTranslate[3][0] = 0;
+				shipWithoutTranslate[3][1] = 0;
+				shipWithoutTranslate[3][2] = 0;
+				//particleMatrix =  glm::translate(collisionCoords) * shipWithoutTranslate * glm::scale(glm::vec3(12500.0f));
+				particleMatrix = glm::scale(glm::vec3(500.0f));
+				/*particleMatrix[3][0] = collisionCoords.x;
 				particleMatrix[3][1] = collisionCoords.y;
-				particleMatrix[3][2] = collisionCoords.z;
+				particleMatrix[3][2] = collisionCoords.z;*/
+				//particleMatrix = particleMatrix * glm::scale(glm::vec3(120.0f));
 				if (pairHeader.actors[0] == rocketBody || pairHeader.actors[1] == rocketBody) {
 					std::cout << "RAKIETA UDERZYLA" << std::endl;
 					if (isObjectDestroyable(*pairHeader.actors[0])) {
@@ -256,7 +262,7 @@ public:
 					}
 					isRocketDestroyed = true;
 				}
-				particleEffects.emplace_back(new ParticleEffect(programParticle, 1, 0.0015625f, textureParticle, glm::vec3(0, 0, 0), glm::vec3((rand() % 10 - 5) * 100.0f, (rand() % 10 - 5) * 100.0f, 0.0f)));
+				particleEffects.emplace_back(new ParticleEffect(programParticle, 1, 0.0015625f, textureParticle, collisionCoords, glm::vec3(0, 0.0f, 0.0f)));
 				std::cout << pairHeader.actors[0] << "  " << pairHeader.actors[1] << std::endl;
 				std::cout << "QQQQQQQQQQQ" << std::endl;
 			}
