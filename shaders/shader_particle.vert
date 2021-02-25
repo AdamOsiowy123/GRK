@@ -10,7 +10,7 @@ uniform mat4 shipModelMatrix;
 
 void main()
 {
-	float scale = 50.0f;
+	float scale = 500.0f;
     TexCoords = vertex.zw;
     gl_Position = cameraProjectionMatrix * vec4((vertex.xy) + particlePosition.xy, particlePosition.z, 1.0);
 }

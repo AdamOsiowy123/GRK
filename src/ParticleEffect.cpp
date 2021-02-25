@@ -29,13 +29,13 @@ void ParticleEffect::init()
 
     unsigned int VBO;
     float particle_quad[] = {
-        0.0f, 1.0f, 0.0f, 1.0f,
-        1.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 0.0f,
+        -5.0f, 5.0f, 0.0f, 1.0f,
+        5.0f, -5.0f, 1.0f, 0.0f,
+        -5.0f, -5.0f, 0.0f, 0.0f,
 
-        0.0f, 1.0f, 0.0f, 1.0f,
-        1.0f, 1.0f, 1.0f, 1.0f,
-        1.0f, 0.0f, 1.0f, 0.0f
+        -5.0f, 5.0f, 0.0f, 1.0f,
+        5.0f, 5.0f, 1.0f, 1.0f,
+        5.0f, -5.0f, 1.0f, 0.0f
     };
     glGenVertexArrays(1, &this->VAO);
     glGenBuffers(1, &VBO);
@@ -84,7 +84,7 @@ void ParticleEffect::update()
         Particle& p = this->particles[i];
         p.Life -= this->delta; 
         p.Age += (this->delta * (rand()%3 + 1));
-        //p.Age += 0.015625f;
+        //p.Age += 0.05625f;
         p.Position -= p.Velocity * this->delta;
     }
 }
@@ -154,7 +154,7 @@ GLuint ParticleEffect::selectTexture(float age)
         index = 63;
     }
     else {
-        index = int(age / (this->delta * 10));
+        index = int(age / (this->delta * 5));
     }
     //std::cout << "index: " << index << std::endl;
     return this->textures[index];

@@ -262,7 +262,7 @@ public:
 					}
 					isRocketDestroyed = true;
 				}
-				auto effect = new ParticleEffect(programParticle, 1, 0.0015625f, textureParticle, glm::vec3(0, 0, 0), glm::vec3((rand() % 10 - 5), (rand() % 10 - 5), 0.0f));
+				auto effect = new ParticleEffect(programParticle, 1, 0.0015625f * 2, textureParticle, collisionCoords, glm::vec3(0.0f, 0.0f, 0.0f));
 				effect->setShipModelMatrix(particleMatrix);
 				particleEffects.emplace_back(effect);
 				std::cout << pairHeader.actors[0] << "  " << pairHeader.actors[1] << std::endl;
@@ -648,12 +648,12 @@ glm::vec3 predictMove() {
 	glm::vec3 ship_pos = glm::vec3(pxtr.p.x, pxtr.p.y, pxtr.p.z);
 	float time = glutGet(GLUT_ELAPSED_TIME) / 1000.0f - appLoadingTime;
 	int sekundaRuchu = int(floorf(time));
-	float u�amekSekundy = time - sekundaRuchu;
+	float ułamekSekundy = time - sekundaRuchu;
 	wektor[0] = wspolrzedneUfo[(sekundaRuchu - 1) % 4];
 	wektor[1] = wspolrzedneUfo[(sekundaRuchu) % 4];
 	wektor[2] = wspolrzedneUfo[(sekundaRuchu + 1) % 4];
 	wektor[3] = wspolrzedneUfo[(sekundaRuchu + 2) % 4];
-	glm::vec3 catmull = glm::catmullRom(wektor[0], wektor[1], wektor[2], wektor[3], u�amekSekundy);
+	glm::vec3 catmull = glm::catmullRom(wektor[0], wektor[1], wektor[2], wektor[3], ułamekSekundy);
 	wspolrzedneUfo[0] = wspolrzedneUfo[1];
 	wspolrzedneUfo[1] = wspolrzedneUfo[2];
 	wspolrzedneUfo[2] = wspolrzedneUfo[3];
