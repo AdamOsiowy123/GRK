@@ -100,6 +100,9 @@ Ufo* ufo;
 PxRigidDynamic* ufoBody = nullptr;
 PxMaterial* ufoMaterial = nullptr;
 /// PHYSICS UFO
+
+std::vector<PxRigidDynamic*> notDestroyable;
+
 GLuint programParticle;
 GLuint programSkybox;
 GLuint programColor;
@@ -197,22 +200,13 @@ float appLoadingTime;
 float timeF;
 float whenShot = 0.0f;
 
-ParticleEffect* effect;
+std::vector<ParticleEffect*> particleEffects;
 
 float swidth = 650.0f, sheight = 650.0f;
 
-bool isActorAsteroid(PxRigidActor &actor) {
-	int arrayLenght = asteroidsBody.size();
-	std::cout << "actor: " << &actor << std::endl;
-	PxRigidDynamic* asteroidBody = (PxRigidDynamic*)actor.userData;
-
-	for (int i = 0; i < arrayLenght; i++) {
-		if (&actor == asteroidsBody[i]) {
-			std::cout << "body: " << asteroidsBody[i] << std::endl;
-			return true;
-		}
-	}
-	return false;
+bool isObjectDestroyable(PxRigidActor& actor) {
+	bool result = std::binary_search(notDestroyable.begin(), notDestroyable.end(), &actor);
+	return !result;
 }
 
 //COLLISIONS
@@ -248,17 +242,17 @@ public:
 				particleMatrix[3][0] = collisionCoords.x;
 				particleMatrix[3][1] = collisionCoords.y;
 				particleMatrix[3][2] = collisionCoords.z;
-				//bool b1 = isActorAsteroid(*pairHeader.actors[0]);
-				//std::cout << b1 << std::endl;
-				//bool b2 = isActorAsteroid(*pairHeader.actors[1]);
-				//std::cout << b2 << std::endl;
 				if (pairHeader.actors[0] == rocketBody || pairHeader.actors[1] == rocketBody) {
 					std::cout << "RAKIETA UDERZYLA" << std::endl;
-					actorsToRemove.emplace_back(pairHeader.actors[0]);
-					actorsToRemove.emplace_back(pairHeader.actors[1]);
+					if (isObjectDestroyable(*pairHeader.actors[0])) {
+						actorsToRemove.emplace_back(pairHeader.actors[0]);
+					}
+					if (isObjectDestroyable(*pairHeader.actors[1])) {
+						actorsToRemove.emplace_back(pairHeader.actors[1]);
+					}
 					isRocketDestroyed = true;
 				}
-				effect = new ParticleEffect(programParticle, 1, 0.0015625f, textureParticle, glm::vec3(0, 0, 0), glm::vec3((rand() % 10 - 5) * 100.0f, (rand() % 10 - 5) * 100.0f, 0.0f));
+				particleEffects.emplace_back(new ParticleEffect(programParticle, 1, 0.0015625f, textureParticle, glm::vec3(0, 0, 0), glm::vec3((rand() % 10 - 5) * 100.0f, (rand() % 10 - 5) * 100.0f, 0.0f)));
 				std::cout << pairHeader.actors[0] << "  " << pairHeader.actors[1] << std::endl;
 				std::cout << "QQQQQQQQQQQ" << std::endl;
 			}
@@ -291,6 +285,7 @@ void initPhysicsScene()
 	shipShape->release();
 	shipBody->userData = ship;
 	scene.scene->addActor(*shipBody);
+	notDestroyable.emplace_back(shipBody);
 
 	for (int i=0; i < 280; i++) {
 		asteroidsBody.emplace_back(scene.physics->createRigidDynamic(PxTransform(wspolrzedne[i].x,wspolrzedne[i].y,wspolrzedne[i].z)));
@@ -311,6 +306,7 @@ void initPhysicsScene()
 	sun1Body->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
 	sun1Body->userData = sun1;
 	scene.scene->addActor(*sun1Body);
+	notDestroyable.emplace_back(sun1Body);
 	sun2Body = scene.physics->createRigidDynamic(PxTransform(sunPos2.x, sunPos2.y, sunPos2.z));
 	PxShape* sun2Shape = scene.physics->createShape(PxSphereGeometry(117), *sunMaterial);
 	sun2Body->attachShape(*sun2Shape);
@@ -318,6 +314,7 @@ void initPhysicsScene()
 	sun2Body->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
 	sun2Body->userData = sun2;
 	scene.scene->addActor(*sun2Body);
+	notDestroyable.emplace_back(sun2Body);
 
 	mercuryBody = scene.physics->createRigidDynamic(PxTransform(mercuryTranslate.x, mercuryTranslate.y, mercuryTranslate.z));
 	planetMaterial = scene.physics->createMaterial(1, 1, 0.6);
@@ -327,6 +324,7 @@ void initPhysicsScene()
 	mercuryBody->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
 	mercuryBody->userData = mercury;
 	scene.scene->addActor(*mercuryBody);
+	notDestroyable.emplace_back(mercuryBody);
 
 	mercuryBody2 = scene.physics->createRigidDynamic(PxTransform(mercury2Translate.x, mercury2Translate.y, mercury2Translate.z));
 	PxShape* mercury2Shape = scene.physics->createShape(PxSphereGeometry(9.6), *planetMaterial);
@@ -335,6 +333,7 @@ void initPhysicsScene()
 	mercuryBody2->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
 	mercuryBody2->userData = mercury2;
 	scene.scene->addActor(*mercuryBody2);
+	notDestroyable.emplace_back(mercuryBody2);
 
 	venusBody = scene.physics->createRigidDynamic(PxTransform(venusTranslate.x, venusTranslate.y, venusTranslate.z));
 	PxShape* venusShape = scene.physics->createShape(PxSphereGeometry(18.15), *planetMaterial);
@@ -343,6 +342,7 @@ void initPhysicsScene()
 	venusBody->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
 	venusBody->userData = venus;
 	scene.scene->addActor(*venusBody);
+	notDestroyable.emplace_back(venusBody);
 
 	venusBody2 = scene.physics->createRigidDynamic(PxTransform(venus2Translate.x, venus2Translate.y, venus2Translate.z));
 	PxShape* venus2Shape = scene.physics->createShape(PxSphereGeometry(18.15), *planetMaterial);
@@ -351,6 +351,7 @@ void initPhysicsScene()
 	venusBody2->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
 	venusBody2->userData = venus2;
 	scene.scene->addActor(*venusBody2);
+	notDestroyable.emplace_back(venusBody2);
 
 	earthBody = scene.physics->createRigidDynamic(PxTransform(earthTranslate.x, earthTranslate.y, earthTranslate.z));
 	PxShape* earthShape = scene.physics->createShape(PxSphereGeometry(19.05), *planetMaterial);
@@ -359,6 +360,7 @@ void initPhysicsScene()
 	earthBody->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
 	earthBody->userData = earth;
 	scene.scene->addActor(*earthBody);
+	notDestroyable.emplace_back(earthBody);
 
 	earthBody2 = scene.physics->createRigidDynamic(PxTransform(earth2Translate.x, earth2Translate.y, earth2Translate.z));
 	PxShape* earth2Shape = scene.physics->createShape(PxSphereGeometry(19.05), *planetMaterial);
@@ -367,6 +369,7 @@ void initPhysicsScene()
 	earthBody2->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
 	earthBody2->userData = earth2;
 	scene.scene->addActor(*earthBody2);
+	notDestroyable.emplace_back(earthBody2);
 
 	marsBody = scene.physics->createRigidDynamic(PxTransform(marsTranslate.x, marsTranslate.y, marsTranslate.z));
 	PxShape* marsShape = scene.physics->createShape(PxSphereGeometry(13.6), *planetMaterial);
@@ -375,6 +378,7 @@ void initPhysicsScene()
 	marsBody->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
 	marsBody->userData = mars;
 	scene.scene->addActor(*marsBody);
+	notDestroyable.emplace_back(marsBody);
 
 	marsBody2 = scene.physics->createRigidDynamic(PxTransform(mars2Translate.x, mars2Translate.y, mars2Translate.z));
 	PxShape* mars2Shape = scene.physics->createShape(PxSphereGeometry(13.6), *planetMaterial);
@@ -383,6 +387,7 @@ void initPhysicsScene()
 	marsBody2->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
 	marsBody2->userData = mars2;
 	scene.scene->addActor(*marsBody2);
+	notDestroyable.emplace_back(marsBody2);
 
 	jupiterBody = scene.physics->createRigidDynamic(PxTransform(jupiterTranslate.x, jupiterTranslate.y, jupiterTranslate.z));
 	PxShape* jupiterShape = scene.physics->createShape(PxSphereGeometry(49.7), *planetMaterial);
@@ -391,6 +396,7 @@ void initPhysicsScene()
 	jupiterBody->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
 	jupiterBody->userData = jupiter;
 	scene.scene->addActor(*jupiterBody);
+	notDestroyable.emplace_back(jupiterBody);
 
 	jupiterBody2 = scene.physics->createRigidDynamic(PxTransform(jupiter2Translate.x, jupiter2Translate.y, jupiter2Translate.z));
 	PxShape* jupiter2Shape = scene.physics->createShape(PxSphereGeometry(49.7), *planetMaterial);
@@ -399,6 +405,7 @@ void initPhysicsScene()
 	jupiterBody2->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
 	jupiterBody2->userData = jupiter2;
 	scene.scene->addActor(*jupiterBody2);
+	notDestroyable.emplace_back(jupiterBody2);
 
 	saturnBody = scene.physics->createRigidDynamic(PxTransform(saturnTranslate.x, saturnTranslate.y, saturnTranslate.z));
 	PxShape* saturnShape = scene.physics->createShape(PxSphereGeometry(85.0), *planetMaterial);
@@ -407,6 +414,7 @@ void initPhysicsScene()
 	saturnBody->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
 	saturnBody->userData = saturn;
 	scene.scene->addActor(*saturnBody);
+	notDestroyable.emplace_back(saturnBody);
 
 	saturnBody2 = scene.physics->createRigidDynamic(PxTransform(saturn2Translate.x, saturn2Translate.y, saturn2Translate.z));
 	PxShape* saturn2Shape = scene.physics->createShape(PxSphereGeometry(85.0), *planetMaterial);
@@ -415,6 +423,7 @@ void initPhysicsScene()
 	saturnBody2->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
 	saturnBody2->userData = saturn2;
 	scene.scene->addActor(*saturnBody2);
+	notDestroyable.emplace_back(saturnBody2);
 
 	uranusBody = scene.physics->createRigidDynamic(PxTransform(uranusTranslate.x, uranusTranslate.y, uranusTranslate.z));
 	PxShape* uranusShape = scene.physics->createShape(PxSphereGeometry(40.0), *planetMaterial);
@@ -423,6 +432,7 @@ void initPhysicsScene()
 	uranusBody->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
 	uranusBody->userData = uranus;
 	scene.scene->addActor(*uranusBody);
+	notDestroyable.emplace_back(uranusBody);
 
 	uranusBody2 = scene.physics->createRigidDynamic(PxTransform(uranus2Translate.x, uranus2Translate.y, uranus2Translate.z));
 	PxShape* uranus2Shape = scene.physics->createShape(PxSphereGeometry(40.0), *planetMaterial);
@@ -431,6 +441,7 @@ void initPhysicsScene()
 	uranusBody2->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
 	uranusBody2->userData = uranus2;
 	scene.scene->addActor(*uranusBody2);
+	notDestroyable.emplace_back(uranusBody2);
 
 	neptuneBody = scene.physics->createRigidDynamic(PxTransform(neptuneTranslate.x, neptuneTranslate.y, neptuneTranslate.z));
 	PxShape* neptuneShape = scene.physics->createShape(PxSphereGeometry(39.0), *planetMaterial);
@@ -439,6 +450,7 @@ void initPhysicsScene()
 	neptuneBody->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
 	neptuneBody->userData = neptune;
 	scene.scene->addActor(*neptuneBody);
+	notDestroyable.emplace_back(neptuneBody);
 
 	neptuneBody2 = scene.physics->createRigidDynamic(PxTransform(neptune2Translate.x, neptune2Translate.y, neptune2Translate.z));
 	PxShape* neptune2Shape = scene.physics->createShape(PxSphereGeometry(39.0), *planetMaterial);
@@ -447,6 +459,7 @@ void initPhysicsScene()
 	neptuneBody2->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
 	neptuneBody2->userData = neptune2;
 	scene.scene->addActor(*neptuneBody2);
+	notDestroyable.emplace_back(neptuneBody2);
 
 	moonBody = scene.physics->createRigidDynamic(PxTransform(moonTranslate.x, moonTranslate.y, moonTranslate.z));
 	PxShape* moonShape = scene.physics->createShape(PxSphereGeometry(4.75), *planetMaterial);
@@ -455,6 +468,7 @@ void initPhysicsScene()
 	moonBody->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
 	moonBody->userData = moon;
 	scene.scene->addActor(*moonBody);
+	notDestroyable.emplace_back(moonBody);
 
 	moonBody2 = scene.physics->createRigidDynamic(PxTransform(moon2Translate.x, moon2Translate.y, moon2Translate.z));
 	PxShape* moon2Shape = scene.physics->createShape(PxSphereGeometry(4.75), *planetMaterial);
@@ -463,6 +477,7 @@ void initPhysicsScene()
 	moonBody2->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
 	moonBody2->userData = moon2;
 	scene.scene->addActor(*moonBody2);
+	notDestroyable.emplace_back(moonBody2);
 
 	ufoBody = scene.physics->createRigidDynamic(PxTransform(10000,10000,10000));
 	ufoMaterial = scene.physics->createMaterial(1, 1, 0.6);
@@ -941,11 +956,11 @@ void drawObjects() {
 	//
 
 	//particle effect
-	if (effect) {
+	for (auto effect : particleEffects) {
 		if (effect->isActive()) {
-			effect->sendProjectionToShader(perspectiveMatrix, cameraMatrix, particleMatrix);
-			effect->simulate();
-		}
+				effect->sendProjectionToShader(perspectiveMatrix, cameraMatrix, particleMatrix);
+				effect->simulate();
+			}
 	}
 	//
 
@@ -1018,8 +1033,8 @@ void mouseClick(int button, int state, int x, int y) {
 		}
 	}
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
-		effect = new ParticleEffect(programParticle, 1, 0.0015625f, textureParticle, glm::vec3(0, 0, 0), glm::vec3(0, 0, 0));
-
+		//effect = new ParticleEffect(programParticle, 1, 0.0015625f, textureParticle, glm::vec3(0, 0, 0), glm::vec3(0, 0, 0));
+		shoot();
 	}
 }
 
