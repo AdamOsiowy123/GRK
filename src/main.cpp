@@ -205,8 +205,12 @@ std::vector<ParticleEffect*> particleEffects;
 float swidth = 650.0f, sheight = 650.0f;
 
 bool isObjectDestroyable(PxRigidActor& actor) {
-	bool result = std::binary_search(notDestroyable.begin(), notDestroyable.end(), &actor);
-	return !result;
+	for (int i = 0; i < notDestroyable.size(); i++) {
+		if (notDestroyable[i] == &actor) {
+			return false;
+		}
+	}
+	return true;
 }
 
 //COLLISIONS
